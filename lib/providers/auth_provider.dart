@@ -72,11 +72,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
 
   // Sign out
   Future<void> signOut() async {
-    state = const AsyncValue.loading();
-
     try {
       await AuthService.signOut();
-      state = const AsyncValue.data(null);
+      // Don't set state here - let the authStateProvider handle it
+      // The Firebase auth stream will automatically update and trigger navigation
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
     }

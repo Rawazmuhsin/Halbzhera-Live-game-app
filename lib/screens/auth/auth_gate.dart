@@ -23,8 +23,36 @@ class AuthGate extends ConsumerWidget {
         }
 
         // Regular user goes to home screen (for now just show a message)
-        return const Scaffold(
-          body: Center(child: Text('Welcome! Home screen coming soon...')),
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('بەخێربێیت'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            actions: [
+              IconButton(
+                onPressed: () async {
+                  try {
+                    await ref.read(authNotifierProvider.notifier).signOut();
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('هەڵە لە چوونەدەرەوە: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.logout),
+                tooltip: 'چوونەدەرەوە',
+              ),
+            ],
+          ),
+          body: const Center(
+            child: Text(
+              'بەخێربێیت! ماڵپەڕی سەرەکی بەزووی دێت...',
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
         );
       },
       loading:
