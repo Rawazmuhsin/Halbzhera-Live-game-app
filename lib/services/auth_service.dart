@@ -211,9 +211,14 @@ class AuthService {
   // Sign out
   static Future<void> signOut() async {
     try {
-      // Update user online status before signing out
+      // Update user online status before signing out (but don't let it block sign out)
       if (currentUser != null) {
-        await _databaseService.updateUserOnlineStatus(currentUser!.uid, false);
+        try {
+          await _databaseService.updateUserOnlineStatus(currentUser!.uid, false);
+        } catch (e) {
+          // Log the error but continue with sign out
+          print('Warning: Could not update online status during sign out: $e');
+        }
       }
 
       // Sign out from Google if signed in

@@ -175,32 +175,15 @@ class AdminHeader extends ConsumerWidget {
                   onTap: () async {
                     Navigator.pop(context); // Close the bottom sheet first
 
-                    // Show loading dialog
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder:
-                          (context) =>
-                              const Center(child: CircularProgressIndicator()),
-                    );
-
                     try {
                       // Call the signOut method from auth provider
                       await ref.read(authNotifierProvider.notifier).signOut();
-
-                      // Close loading dialog
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-
+                      
                       // The AuthGate will automatically navigate to login screen
                       // when the auth state changes to null
                     } catch (e) {
-                      // Close loading dialog
+                      // Show error if sign out fails
                       if (context.mounted) {
-                        Navigator.pop(context);
-
-                        // Show error message
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('هەڵە لە چوونەدەرەوە: $e'),

@@ -1,11 +1,13 @@
 // File: lib/widgets/admin/users_tab.dart
-// Description: Users tab content widget
+// Description: Users tab content widget with view and delete functionality
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/loading_widget.dart';
+import '../../widgets/admin/user_info_card.dart';
+import '../../screens/admin/user_details_screen.dart';
 
 class UsersTab extends ConsumerStatefulWidget {
   const UsersTab({super.key});
@@ -129,184 +131,20 @@ class _UsersTabState extends ConsumerState<UsersTab> {
             return ListView.builder(
               padding: const EdgeInsets.all(AppDimensions.paddingM),
               itemCount: filteredUsers.length,
-              itemBuilder:
-                  (context, index) => _buildUserCard(filteredUsers[index]),
+              itemBuilder: (context, index) => UserInfoCard(
+                user: filteredUsers[index],
+                onView: () => _viewUser(filteredUsers[index]),
+                onDelete: () => _deleteUser(filteredUsers[index]),
+              ),
             );
           },
-          loading:
-              () => const LoadingWidget(
-                message: 'بارکردنی بەکارهێنەران...',
-                showMessage: true,
-              ),
+          loading: () => const LoadingWidget(
+            message: 'بارکردنی بەکارهێنەران...',
+            showMessage: true,
+          ),
           error: (error, _) => _buildErrorState(error.toString()),
         );
       },
-    );
-  }
-
-  Widget _buildUserCard(user) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppDimensions.paddingS),
-      padding: const EdgeInsets.all(AppDimensions.paddingM),
-      decoration: BoxDecoration(
-        color: AppColors.surface2,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-        border: Border.all(color: AppColors.border1),
-      ),
-      child: Row(
-        children: [
-          _buildUserAvatar(user),
-          const SizedBox(width: AppDimensions.paddingM),
-          _buildUserInfo(user),
-          _buildUserActions(user),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserAvatar(user) {
-    return CircleAvatar(
-      radius: 25,
-      backgroundColor: AppColors.primaryTeal,
-      backgroundImage:
-          user.photoURL != null ? NetworkImage(user.photoURL!) : null,
-      child:
-          user.photoURL == null
-              ? Text(
-                user.displayName?.substring(0, 1).toUpperCase() ?? 'U',
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              )
-              : null,
-    );
-  }
-
-  Widget _buildUserInfo(user) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            user.displayName ?? 'Unknown User',
-            style: const TextStyle(
-              color: AppColors.lightText,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          if (user.email != null)
-            Text(
-              user.email!,
-              style: const TextStyle(color: AppColors.mediumText, fontSize: 14),
-            ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              _buildInfoChip('خاڵ: ${user.totalScore}', AppColors.accentYellow),
-              const SizedBox(width: AppDimensions.paddingS),
-              _buildInfoChip(
-                'یاری: ${user.gamesPlayed}',
-                AppColors.primaryTeal,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUserActions(user) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color:
-                user.isOnline
-                    ? AppColors.success.withOpacity(0.2)
-                    : AppColors.mediumText.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            user.isOnline ? 'چالاک' : 'ناچالاک',
-            style: TextStyle(
-              color: user.isOnline ? AppColors.success : AppColors.mediumText,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: AppColors.mediumText),
-          color: AppColors.surface3,
-          onSelected: (value) => _handleUserAction(value, user),
-          itemBuilder:
-              (context) => [
-                const PopupMenuItem(
-                  value: 'view',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.visibility,
-                        color: AppColors.lightText,
-                        size: 16,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'بینین',
-                        style: TextStyle(color: AppColors.lightText),
-                      ),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, color: AppColors.lightText, size: 16),
-                      SizedBox(width: 8),
-                      Text(
-                        'دەستکاری',
-                        style: TextStyle(color: AppColors.lightText),
-                      ),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: AppColors.error, size: 16),
-                      SizedBox(width: 8),
-                      Text('سڕینەوە', style: TextStyle(color: AppColors.error)),
-                    ],
-                  ),
-                ),
-              ],
-        ),
-      ],
     );
   }
 
@@ -340,7 +178,7 @@ class _UsersTabState extends ConsumerState<UsersTab> {
           ),
           const SizedBox(height: AppDimensions.paddingM),
           ElevatedButton(
-            onPressed: () => ref.refresh(allUsersProvider),
+            onPressed: () => ref.invalidate(allUsersProvider),
             child: const Text('دووبارە هەوڵبدەوە'),
           ),
         ],
@@ -350,8 +188,7 @@ class _UsersTabState extends ConsumerState<UsersTab> {
 
   List _filterUsers(List users) {
     return users.where((user) {
-      final matchesSearch =
-          _searchQuery.isEmpty ||
+      final matchesSearch = _searchQuery.isEmpty ||
           user.displayName?.toLowerCase().contains(
                 _searchQuery.toLowerCase(),
               ) ==
@@ -359,8 +196,7 @@ class _UsersTabState extends ConsumerState<UsersTab> {
           user.email?.toLowerCase().contains(_searchQuery.toLowerCase()) ==
               true;
 
-      final matchesFilter =
-          _selectedFilter == 'all' ||
+      final matchesFilter = _selectedFilter == 'all' ||
           (_selectedFilter == 'active' && user.isOnline) ||
           (_selectedFilter == 'inactive' && !user.isOnline);
 
@@ -371,141 +207,225 @@ class _UsersTabState extends ConsumerState<UsersTab> {
   void _showSearchDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColors.surface2,
-            title: const Text(
-              'گەڕان',
-              style: TextStyle(color: AppColors.lightText),
-            ),
-            content: TextField(
-              onChanged: (value) => setState(() => _searchQuery = value),
-              decoration: const InputDecoration(
-                hintText: 'ناو یان ئیمەیڵ بنووسە...',
-                hintStyle: TextStyle(color: AppColors.mediumText),
-              ),
-              style: const TextStyle(color: AppColors.lightText),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('داخستن'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface2,
+        title: const Text(
+          'گەڕان',
+          style: TextStyle(color: AppColors.lightText),
+        ),
+        content: TextField(
+          onChanged: (value) => setState(() => _searchQuery = value),
+          decoration: const InputDecoration(
+            hintText: 'ناو یان ئیمەیڵ بنووسە...',
+            hintStyle: TextStyle(color: AppColors.mediumText),
           ),
+          style: const TextStyle(color: AppColors.lightText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('داخستن'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColors.surface2,
-            title: const Text(
-              'فلتەر',
-              style: TextStyle(color: AppColors.lightText),
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface2,
+        title: const Text(
+          'فلتەر',
+          style: TextStyle(color: AppColors.lightText),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              title: const Text(
+                'هەموو',
+                style: TextStyle(color: AppColors.lightText),
+              ),
+              value: 'all',
+              groupValue: _selectedFilter,
+              onChanged: (value) {
+                setState(() => _selectedFilter = value!);
+                Navigator.pop(context);
+              },
             ),
-            content: Column(
+            RadioListTile<String>(
+              title: const Text(
+                'چالاک',
+                style: TextStyle(color: AppColors.lightText),
+              ),
+              value: 'active',
+              groupValue: _selectedFilter,
+              onChanged: (value) {
+                setState(() => _selectedFilter = value!);
+                Navigator.pop(context);
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text(
+                'ناچالاک',
+                style: TextStyle(color: AppColors.lightText),
+              ),
+              value: 'inactive',
+              groupValue: _selectedFilter,
+              onChanged: (value) {
+                setState(() => _selectedFilter = value!);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _viewUser(user) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserDetailsScreen(user: user),
+      ),
+    );
+  }
+
+  void _deleteUser(user) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface2,
+        title: const Text(
+          'سڕینەوەی بەکارهێنەر',
+          style: TextStyle(color: AppColors.lightText),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ئایا دڵنیایت لە سڕینەوەی بەکارهێنەر "${user.displayName}"؟',
+              style: const TextStyle(color: AppColors.mediumText),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.error.withOpacity(0.3)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.warning, color: AppColors.error, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'ئەم کردارە ناگەڕێتەوە و هەموو زانیاریەکانی بەکارهێنەر دەسڕێتەوە.',
+                      style: TextStyle(
+                        color: AppColors.error,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'پاشگەزبوونەوە',
+              style: TextStyle(color: AppColors.mediumText),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _performUserDeletion(user);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+              backgroundColor: AppColors.error.withOpacity(0.1),
+            ),
+            child: const Text('سڕینەوە'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _performUserDeletion(user) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Dialog(
+          backgroundColor: AppColors.surface2,
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                RadioListTile<String>(
-                  title: const Text(
-                    'هەموو',
-                    style: TextStyle(color: AppColors.lightText),
-                  ),
-                  value: 'all',
-                  groupValue: _selectedFilter,
-                  onChanged: (value) {
-                    setState(() => _selectedFilter = value!);
-                    Navigator.pop(context);
-                  },
-                ),
-                RadioListTile<String>(
-                  title: const Text(
-                    'چالاک',
-                    style: TextStyle(color: AppColors.lightText),
-                  ),
-                  value: 'active',
-                  groupValue: _selectedFilter,
-                  onChanged: (value) {
-                    setState(() => _selectedFilter = value!);
-                    Navigator.pop(context);
-                  },
-                ),
-                RadioListTile<String>(
-                  title: const Text(
-                    'ناچالاک',
-                    style: TextStyle(color: AppColors.lightText),
-                  ),
-                  value: 'inactive',
-                  groupValue: _selectedFilter,
-                  onChanged: (value) {
-                    setState(() => _selectedFilter = value!);
-                    Navigator.pop(context);
-                  },
+                CircularProgressIndicator(color: AppColors.primaryTeal),
+                SizedBox(width: 16),
+                Text(
+                  'سڕینەوەی بەکارهێنەر...',
+                  style: TextStyle(color: AppColors.lightText),
                 ),
               ],
             ),
           ),
-    );
-  }
+        ),
+      );
 
-  void _handleUserAction(String action, user) {
-    switch (action) {
-      case 'view':
-        _viewUser(user);
-        break;
-      case 'edit':
-        _editUser(user);
-        break;
-      case 'delete':
-        _deleteUser(user);
-        break;
-    }
-  }
+      // Delete user from database
+      final databaseService = ref.read(databaseServiceProvider);
+      await databaseService.deleteUser(user.uid);
 
-  void _viewUser(user) {
-    // Navigate to user details
-    print('View user: ${user.uid}');
-  }
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
 
-  void _editUser(user) {
-    // Navigate to edit user
-    print('Edit user: ${user.uid}');
-  }
+      // Refresh the users list
+      ref.invalidate(allUsersProvider);
 
-  void _deleteUser(user) {
-    // Show delete confirmation
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColors.surface2,
-            title: const Text(
-              'سڕینەوە',
-              style: TextStyle(color: AppColors.lightText),
-            ),
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
             content: Text(
-              'ئایا دڵنیایت لە سڕینەوەی ${user.displayName}؟',
-              style: const TextStyle(color: AppColors.mediumText),
+              'بەکارهێنەر "${user.displayName}" بە سەرکەوتووی سڕایەوە',
+              style: const TextStyle(color: AppColors.white),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('پاشگەزبوونەوە'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Delete user logic here
-                  print('Delete user: ${user.uid}');
-                },
-                style: TextButton.styleFrom(foregroundColor: AppColors.error),
-                child: const Text('سڕینەوە'),
-              ),
-            ],
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 3),
           ),
-    );
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'هەڵە لە سڕینەوەی بەکارهێنەر: $e',
+              style: const TextStyle(color: AppColors.white),
+            ),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 }

@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/live_game_provider.dart';
+import '../../screens/admin/create_game_screen.dart';
+import '../../screens/admin/add_questions_screen.dart';
 import '../../widgets/common/loading_widget.dart';
 import 'stat_card.dart';
 import 'action_card.dart';
@@ -144,25 +146,25 @@ class OverviewTab extends ConsumerWidget {
                   title: 'یاری نوێ دروستبکە',
                   icon: Icons.add_circle,
                   color: AppColors.primaryRed,
-                  onTap: _navigateToCreateGame,
+                  onTap: () => _navigateToCreateGame(context),
                 ),
                 ActionCard(
                   title: 'بەشی نوێ زیادبکە',
                   icon: Icons.category,
                   color: AppColors.primaryTeal,
-                  onTap: _navigateToCreateCategory,
+                  onTap: () => _navigateToCreateCategory(context),
                 ),
                 ActionCard(
                   title: 'پرسیار زیادبکە',
                   icon: Icons.quiz,
                   color: AppColors.accentYellow,
-                  onTap: _navigateToAddQuestions,
+                  onTap: () => _navigateToAddQuestions(context),
                 ),
                 ActionCard(
                   title: 'یاری زیندوو ببینە',
                   icon: Icons.live_tv,
                   color: AppColors.success,
-                  onTap: _navigateToLiveMonitor,
+                  onTap: () => _navigateToLiveMonitor(context),
                 ),
               ],
             );
@@ -253,22 +255,26 @@ class OverviewTab extends ConsumerWidget {
     print('Navigate to all games');
   }
 
-  void _navigateToCreateGame() {
-    // Navigate to create game page
-    print('Navigate to create game');
+  void _navigateToCreateGame(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateGameScreen()),
+    );
   }
 
-  void _navigateToCreateCategory() {
+  void _navigateToCreateCategory(BuildContext context) {
     // Navigate to create category page
     print('Navigate to create category');
   }
 
-  void _navigateToAddQuestions() {
-    // Navigate to add questions page
-    print('Navigate to add questions');
+  void _navigateToAddQuestions(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddQuestionsScreen()),
+    );
   }
 
-  void _navigateToLiveMonitor() {
+  void _navigateToLiveMonitor(BuildContext context) {
     // Navigate to live game monitor
     print('Navigate to live monitor');
   }

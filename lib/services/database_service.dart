@@ -53,22 +53,38 @@ class DatabaseService {
   // Update user online status
   Future<void> updateUserOnlineStatus(String uid, bool isOnline) async {
     try {
-      await FirebaseConfig.getUserDoc(uid).update({
-        'isOnline': isOnline,
-        'lastSeen': FieldValue.serverTimestamp(),
-      });
+      // Check if document exists first
+      final docSnapshot = await FirebaseConfig.getUserDoc(uid).get();
+      
+      if (docSnapshot.exists) {
+        await FirebaseConfig.getUserDoc(uid).update({
+          'isOnline': isOnline,
+          'lastSeen': FieldValue.serverTimestamp(),
+        });
+      } else {
+        // Document doesn't exist, skip the update silently
+        print('User document $uid not found, skipping online status update');
+      }
     } catch (e) {
-      throw Exception('Failed to update online status: $e');
+      // Log the error but don't throw to prevent sign-out failures
+      print('Failed to update online status for $uid: $e');
     }
   }
 
   // Update user score
   Future<void> updateUserScore(String uid, int scoreToAdd) async {
     try {
-      await FirebaseConfig.getUserDoc(uid).update({
-        'totalScore': FieldValue.increment(scoreToAdd),
-        'gamesPlayed': FieldValue.increment(1),
-      });
+      // Check if document exists first
+      final docSnapshot = await FirebaseConfig.getUserDoc(uid).get();
+      
+      if (docSnapshot.exists) {
+        await FirebaseConfig.getUserDoc(uid).update({
+          'totalScore': FieldValue.increment(scoreToAdd),
+          'gamesPlayed': FieldValue.increment(1),
+        });
+      } else {
+        print('User document $uid not found, skipping score update');
+      }
     } catch (e) {
       throw Exception('Failed to update user score: $e');
     }
