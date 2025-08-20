@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "956166002079",
+    "project_id": "halbzhera-quiz-app-62c6e",
+    "storage_bucket": "halbzhera-quiz-app-62c6e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956166002079:android:ff405227215fd84f6019aa",
+        "android_client_info": {
+          "package_name": "com.example.halbzhera"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956166002079-thl9b82ouf9kdh1jl2lpejo65ncg5ptn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFDZpOAnUGwFEVkimp5Fe8_ywfEPZGUCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956166002079-thl9b82ouf9kdh1jl2lpejo65ncg5ptn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "956166002079-gagig7v5k2t6ci5f12t6mpkjqbc20fat.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.halbzhera.quizz"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956166002079:android:be299606fe0e315e6019aa",
+        "android_client_info": {
+          "package_name": "com.halbzhera.quizz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956166002079-2pklgad2vjapgbhb2oafa08icf3s5m0q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.halbzhera.quizz",
+            "certificate_hash": "94cd21a58532944e14bd34a54cf2b107c7f9b83f"
+          }
+        },
+        {
+          "client_id": "956166002079-thl9b82ouf9kdh1jl2lpejo65ncg5ptn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFDZpOAnUGwFEVkimp5Fe8_ywfEPZGUCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956166002079-thl9b82ouf9kdh1jl2lpejo65ncg5ptn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "956166002079-gagig7v5k2t6ci5f12t6mpkjqbc20fat.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.halbzhera.quizz"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

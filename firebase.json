@@ -1,0 +1,44 @@
+{
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "halbzhera-quiz-app-62c6e",
+          "appId": "1:956166002079:android:ff405227215fd84f6019aa",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "halbzhera-quiz-app-62c6e",
+          "appId": "1:956166002079:ios:d1f532b83043586f6019aa",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "halbzhera-quiz-app-62c6e",
+          "appId": "1:956166002079:ios:d1f532b83043586f6019aa",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "halbzhera-quiz-app-62c6e",
+          "configurations": {
+            "android": "1:956166002079:android:ff405227215fd84f6019aa",
+            "ios": "1:956166002079:ios:d1f532b83043586f6019aa",
+            "macos": "1:956166002079:ios:d1f532b83043586f6019aa",
+            "web": "1:956166002079:web:c066cd84737ad70a6019aa",
+            "windows": "1:956166002079:web:3740bef22ba0ad116019aa"
+          }
+        }
+      }
+    }
+  }
+}
