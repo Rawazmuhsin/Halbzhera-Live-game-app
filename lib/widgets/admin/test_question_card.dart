@@ -24,7 +24,7 @@ class TestQuestionCard extends StatelessWidget {
         border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
       ),
       child: Text(
-        '${index}. ${question.question}',
+        '$index. ${question.question}',
         style: const TextStyle(color: Colors.white),
       ),
     );

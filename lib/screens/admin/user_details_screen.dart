@@ -9,10 +9,7 @@ import '../../utils/constants.dart';
 class UserDetailsScreen extends ConsumerWidget {
   final UserModel user;
 
-  const UserDetailsScreen({
-    super.key,
-    required this.user,
-  });
+  const UserDetailsScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,17 +66,19 @@ class UserDetailsScreen extends ConsumerWidget {
             child: CircleAvatar(
               radius: 40,
               backgroundColor: AppColors.primaryTeal,
-              backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
-              child: user.photoURL == null
-                  ? Text(
-                      user.displayName?.substring(0, 1).toUpperCase() ?? 'U',
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 28,
-                      ),
-                    )
-                  : null,
+              backgroundImage:
+                  user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+              child:
+                  user.photoURL == null
+                      ? Text(
+                        user.displayName?.substring(0, 1).toUpperCase() ?? 'U',
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
+                        ),
+                      )
+                      : null,
             ),
           ),
           const SizedBox(width: AppDimensions.paddingL),
@@ -111,16 +110,21 @@ class UserDetailsScreen extends ConsumerWidget {
                 ],
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: user.isOnline
-                        ? AppColors.success.withOpacity(0.2)
-                        : AppColors.mediumText.withOpacity(0.2),
+                    color:
+                        user.isOnline
+                            ? AppColors.success.withOpacity(0.2)
+                            : AppColors.mediumText.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: user.isOnline
-                          ? AppColors.success.withOpacity(0.5)
-                          : AppColors.mediumText.withOpacity(0.5),
+                      color:
+                          user.isOnline
+                              ? AppColors.success.withOpacity(0.5)
+                              : AppColors.mediumText.withOpacity(0.5),
                     ),
                   ),
                   child: Row(
@@ -131,14 +135,20 @@ class UserDetailsScreen extends ConsumerWidget {
                         height: 8,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: user.isOnline ? AppColors.success : AppColors.mediumText,
+                          color:
+                              user.isOnline
+                                  ? AppColors.success
+                                  : AppColors.mediumText,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         user.isOnline ? 'چالاک' : 'ناچالاک',
                         style: TextStyle(
-                          color: user.isOnline ? AppColors.success : AppColors.mediumText,
+                          color:
+                              user.isOnline
+                                  ? AppColors.success
+                                  : AppColors.mediumText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -244,64 +254,65 @@ class UserDetailsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppDimensions.radiusM),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
-      child: fullWidth
-          ? Row(
-              children: [
-                Icon(icon, color: color, size: 24),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+      child:
+          fullWidth
+              ? Row(
+                children: [
+                  Icon(icon, color: color, size: 24),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        value,
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          value,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            )
-          : Column(
-              children: [
-                Icon(icon, color: color, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                ],
+              )
+              : Column(
+                children: [
+                  Icon(icon, color: color, size: 32),
+                  const SizedBox(height: 8),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-              ],
-            ),
+                ],
+              ),
     );
   }
 
@@ -328,10 +339,7 @@ class UserDetailsScreen extends ConsumerWidget {
           _buildDetailRow('ناسنامەی بەکارهێنەر', user.uid),
           _buildDetailRow('دواجار بینراوە', _formatDateTime(user.lastSeen)),
           _buildDetailRow('بەروار دروستکردن', _formatDateTime(user.createdAt)),
-          _buildDetailRow(
-            'جۆری چوونەژوورەوە',
-            _getProviderName(user.provider),
-          ),
+          _buildDetailRow('جۆری چوونەژوورەوە', _getProviderName(user.provider)),
         ],
       ),
     );
@@ -395,10 +403,7 @@ class UserDetailsScreen extends ConsumerWidget {
           ] else
             const Text(
               'هیچ ڕێکخستنێک نەدۆزرایەوە',
-              style: TextStyle(
-                color: AppColors.mediumText,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.mediumText, fontSize: 14),
             ),
         ],
       ),
@@ -422,10 +427,7 @@ class UserDetailsScreen extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              color: AppColors.lightText,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: AppColors.lightText, fontSize: 14),
             overflow: TextOverflow.ellipsis,
             maxLines: 3,
           ),

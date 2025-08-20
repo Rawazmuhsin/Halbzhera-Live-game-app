@@ -57,17 +57,19 @@ class UserInfoCard extends StatelessWidget {
       child: CircleAvatar(
         radius: 28,
         backgroundColor: AppColors.primaryTeal,
-        backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
-        child: user.photoURL == null
-            ? Text(
-                user.displayName?.substring(0, 1).toUpperCase() ?? 'U',
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              )
-            : null,
+        backgroundImage:
+            user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+        child:
+            user.photoURL == null
+                ? Text(
+                  user.displayName?.substring(0, 1).toUpperCase() ?? 'U',
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                )
+                : null,
       ),
     );
   }
@@ -89,10 +91,7 @@ class UserInfoCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             user.email!,
-            style: const TextStyle(
-              color: AppColors.mediumText,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: AppColors.mediumText, fontSize: 14),
             overflow: TextOverflow.ellipsis,
           ),
         ],
@@ -139,14 +138,16 @@ class UserInfoCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: user.isOnline
-                ? AppColors.success.withOpacity(0.2)
-                : AppColors.mediumText.withOpacity(0.2),
+            color:
+                user.isOnline
+                    ? AppColors.success.withOpacity(0.2)
+                    : AppColors.mediumText.withOpacity(0.2),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: user.isOnline
-                  ? AppColors.success.withOpacity(0.5)
-                  : AppColors.mediumText.withOpacity(0.5),
+              color:
+                  user.isOnline
+                      ? AppColors.success.withOpacity(0.5)
+                      : AppColors.mediumText.withOpacity(0.5),
             ),
           ),
           child: Row(
@@ -157,14 +158,16 @@ class UserInfoCard extends StatelessWidget {
                 height: 8,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: user.isOnline ? AppColors.success : AppColors.mediumText,
+                  color:
+                      user.isOnline ? AppColors.success : AppColors.mediumText,
                 ),
               ),
               const SizedBox(width: 6),
               Text(
                 user.isOnline ? 'چالاک' : 'ناچالاک',
                 style: TextStyle(
-                  color: user.isOnline ? AppColors.success : AppColors.mediumText,
+                  color:
+                      user.isOnline ? AppColors.success : AppColors.mediumText,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),

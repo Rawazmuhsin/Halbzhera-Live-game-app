@@ -108,7 +108,7 @@ class GameCard extends ConsumerWidget {
                             ),
                           ),
                       loading:
-                          () => Container(
+                          () => SizedBox(
                             width: 20,
                             height: 20,
                             child: const CircularProgressIndicator(

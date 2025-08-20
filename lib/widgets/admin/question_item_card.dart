@@ -304,7 +304,7 @@ class QuestionItemCard extends ConsumerWidget {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ] else if (question.type == QuestionType.trueFalse) ...[
                     const Text(
                       'وەڵام:',

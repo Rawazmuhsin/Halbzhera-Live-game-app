@@ -178,7 +178,7 @@ class AdminHeader extends ConsumerWidget {
                     try {
                       // Call the signOut method from auth provider
                       await ref.read(authNotifierProvider.notifier).signOut();
-                      
+
                       // The AuthGate will automatically navigate to login screen
                       // when the auth state changes to null
                     } catch (e) {

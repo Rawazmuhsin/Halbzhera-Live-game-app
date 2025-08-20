@@ -55,7 +55,7 @@ class DatabaseService {
     try {
       // Check if document exists first
       final docSnapshot = await FirebaseConfig.getUserDoc(uid).get();
-      
+
       if (docSnapshot.exists) {
         await FirebaseConfig.getUserDoc(uid).update({
           'isOnline': isOnline,
@@ -76,7 +76,7 @@ class DatabaseService {
     try {
       // Check if document exists first
       final docSnapshot = await FirebaseConfig.getUserDoc(uid).get();
-      
+
       if (docSnapshot.exists) {
         await FirebaseConfig.getUserDoc(uid).update({
           'totalScore': FieldValue.increment(scoreToAdd),

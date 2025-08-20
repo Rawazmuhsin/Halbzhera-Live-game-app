@@ -158,7 +158,7 @@ class SectionQuestionsScreen extends ConsumerWidget {
                         const SizedBox(width: 12),
                         _buildInfoChip(
                           'خاڵ',
-                          '${gameSection.prize}',
+                          gameSection.prize,
                           Icons.stars,
                           Colors.amber,
                         ),
