@@ -28,8 +28,9 @@ class AdminHeader extends ConsumerWidget {
         children: [
           _buildLogo(),
           const SizedBox(width: AppDimensions.paddingM),
+          // Title should take the remaining space so long names don't
+          // push / overflow the profile area.
           _buildTitle(),
-          const Spacer(),
           _buildProfileSection(context, ref),
         ],
       ),
@@ -65,22 +66,28 @@ class AdminHeader extends ConsumerWidget {
   }
 
   Widget _buildTitle() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Halbzhera Admin',
-          style: TextStyle(
-            color: AppColors.lightText,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            'Halbzhera Admin',
+            style: TextStyle(
+              color: AppColors.lightText,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-        Text(
-          'بەڕێوەبردنی یاری زیندوو',
-          style: TextStyle(color: AppColors.mediumText, fontSize: 14),
-        ),
-      ],
+          Text(
+            'بەڕێوەبردنی یاری زیندوو',
+            style: TextStyle(color: AppColors.mediumText, fontSize: 14),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -90,12 +97,17 @@ class AdminHeader extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            currentUser.displayName ?? 'Admin',
-            style: const TextStyle(
-              color: AppColors.lightText,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+          Flexible(
+            child: Text(
+              currentUser.displayName ?? 'Admin',
+              style: const TextStyle(
+                color: AppColors.lightText,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
             ),
           ),
           const SizedBox(width: AppDimensions.paddingS),

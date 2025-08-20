@@ -11,6 +11,8 @@ import '../../widgets/common/loading_widget.dart';
 import '../../models/live_game_model.dart';
 import '../../models/scheduled_game_model.dart';
 import '../../screens/admin/create_game_screen.dart';
+import '../../screens/admin/add_questions_screen.dart';
+import '../../screens/admin/section_questions_screen.dart';
 
 class GamesTab extends ConsumerWidget {
   const GamesTab({super.key});
@@ -63,16 +65,30 @@ class GamesTab extends ConsumerWidget {
             const SizedBox(width: AppDimensions.paddingM),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: _navigateToCreateCategory,
-                icon: const Icon(Icons.category),
-                label: const Text('بەشی نوێ زیادبکە'),
+                onPressed: () => _navigateToAddQuestions(context),
+                icon: const Icon(Icons.quiz_outlined),
+                label: const Text('پرسیار زیادکردن'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryTeal,
+                  backgroundColor: AppColors.accentYellow,
+                  foregroundColor: AppColors.darkText,
                   padding: const EdgeInsets.all(AppDimensions.paddingM),
                 ),
               ),
             ),
           ],
+        ),
+        const SizedBox(height: AppDimensions.paddingM),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: _navigateToCreateCategory,
+            icon: const Icon(Icons.category),
+            label: const Text('بەشی نوێ زیادبکە'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryTeal,
+              padding: const EdgeInsets.all(AppDimensions.paddingM),
+            ),
+          ),
         ),
       ],
     );
@@ -383,6 +399,16 @@ class GamesTab extends ConsumerWidget {
                 color: AppColors.surface3,
                 onSelected: (value) {
                   switch (value) {
+                    case 'view_questions':
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  SectionQuestionsScreen(gameSection: game),
+                        ),
+                      );
+                      break;
                     case 'edit':
                       Navigator.push(
                         context,
@@ -402,6 +428,23 @@ class GamesTab extends ConsumerWidget {
                 },
                 itemBuilder:
                     (popupContext) => [
+                      const PopupMenuItem(
+                        value: 'view_questions',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.quiz,
+                              color: AppColors.primaryTeal,
+                              size: 16,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'بینینی پرسیارەکان',
+                              style: TextStyle(color: AppColors.lightText),
+                            ),
+                          ],
+                        ),
+                      ),
                       const PopupMenuItem(
                         value: 'edit',
                         child: Row(
@@ -619,6 +662,13 @@ class GamesTab extends ConsumerWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreateGameScreen()),
+    );
+  }
+
+  void _navigateToAddQuestions(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddQuestionsScreen()),
     );
   }
 

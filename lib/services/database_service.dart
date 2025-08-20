@@ -6,6 +6,8 @@ import '../config/firebase_config.dart';
 import '../models/user_model.dart';
 import '../models/live_game_model.dart';
 import '../models/scheduled_game_model.dart';
+import '../models/question_model.dart';
+import '../models/category_model.dart';
 
 class DatabaseService {
   final FirebaseFirestore _firestore = FirebaseConfig.firestore;
@@ -1103,6 +1105,142 @@ class DatabaseService {
           .toList();
     } catch (e) {
       throw Exception('Failed to get games ready to start: $e');
+    }
+  }
+
+  // ============================================================================
+  // QUESTION STREAM OPERATIONS
+  // ============================================================================
+
+  // Get categories stream
+  Stream<List<CategoryModel>> getCategoriesStream() {
+    return FirebaseConfig.categories
+        .where('isActive', isEqualTo: true)
+        .orderBy('name')
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => CategoryModel.fromFirestore(doc))
+                  .toList(),
+        );
+  }
+
+  // Get questions by category stream
+  Stream<List<QuestionModel>> getQuestionsByCategoryStream(String categoryId) {
+    return FirebaseConfig.questions
+        .where('category', isEqualTo: categoryId)
+        .where('isActive', isEqualTo: true)
+        // .orderBy('order') // Temporarily commented out until index is built
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => QuestionModel.fromFirestore(doc))
+                  .toList()
+                ..sort(
+                  (a, b) => a.order.compareTo(b.order),
+                ), // Sort in memory instead
+        );
+  }
+
+  // Get all questions stream (for admin)
+  Stream<List<QuestionModel>> getAllQuestionsStream() {
+    return FirebaseConfig.questions
+        .where('isActive', isEqualTo: true)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => QuestionModel.fromFirestore(doc))
+                  .toList(),
+        );
+  }
+
+  // Get question statistics
+  Future<Map<String, dynamic>> getQuestionStatistics() async {
+    try {
+      final questionsSnapshot =
+          await FirebaseConfig.questions
+              .where('isActive', isEqualTo: true)
+              .get();
+
+      final categoriesSnapshot =
+          await FirebaseConfig.categories
+              .where('isActive', isEqualTo: true)
+              .get();
+
+      final totalQuestions = questionsSnapshot.docs.length;
+      final totalCategories = categoriesSnapshot.docs.length;
+
+      // Count questions by difficulty
+      int easyCount = 0;
+      int mediumCount = 0;
+      int hardCount = 0;
+
+      for (final doc in questionsSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final difficulty = data['difficulty'] ?? 0;
+        switch (difficulty) {
+          case 0:
+            easyCount++;
+            break;
+          case 1:
+            mediumCount++;
+            break;
+          case 2:
+            hardCount++;
+            break;
+        }
+      }
+
+      // Count questions by type
+      int multipleChoiceCount = 0;
+      int trueFalseCount = 0;
+      int fillInBlankCount = 0;
+
+      for (final doc in questionsSnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final type = data['type'] ?? 0;
+        switch (type) {
+          case 0:
+            multipleChoiceCount++;
+            break;
+          case 1:
+            trueFalseCount++;
+            break;
+          case 2:
+            fillInBlankCount++;
+            break;
+        }
+      }
+
+      return {
+        'totalQuestions': totalQuestions,
+        'totalCategories': totalCategories,
+        'byDifficulty': {
+          'easy': easyCount,
+          'medium': mediumCount,
+          'hard': hardCount,
+        },
+        'byType': {
+          'multipleChoice': multipleChoiceCount,
+          'trueFalse': trueFalseCount,
+          'fillInBlank': fillInBlankCount,
+        },
+      };
+    } catch (e) {
+      throw Exception('Failed to get question statistics: $e');
+    }
+  }
+
+  // Delete question (hard delete - permanently removes from database)
+  Future<void> deleteQuestion(String questionId) async {
+    try {
+      await FirebaseConfig.getQuestionDoc(questionId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete question: $e');
     }
   }
 }
