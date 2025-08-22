@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import '../../widgets/common/gradient_background.dart';
 import '../../widgets/home/home_header.dart';
 import '../../widgets/home/welcome_section.dart';
 import '../../widgets/home/navigation_grid.dart';
@@ -50,32 +51,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const HomeHeader(),
-      body: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppDimensions.paddingL),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const WelcomeSection(),
-                    const SizedBox(height: AppDimensions.paddingXL),
-                    const NavigationGrid(),
-                    const SizedBox(height: AppDimensions.paddingXL),
-                    const GamesList(),
-                  ],
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: const HomeHeader(),
+        body: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppDimensions.paddingL),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const WelcomeSection(),
+                      const SizedBox(height: AppDimensions.paddingXL),
+                      const NavigationGrid(),
+                      const SizedBox(height: AppDimensions.paddingXL),
+                      const GamesList(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

@@ -310,8 +310,11 @@ class GamesTab extends ConsumerWidget {
                       games
                           .take(3)
                           .map(
-                            (game) =>
-                                _buildUpcomingScheduledGameCard(context, game),
+                            (game) => _buildUpcomingScheduledGameCard(
+                              context,
+                              ref,
+                              game,
+                            ),
                           )
                           .toList(),
                 );
@@ -327,6 +330,7 @@ class GamesTab extends ConsumerWidget {
 
   Widget _buildUpcomingScheduledGameCard(
     BuildContext context,
+    WidgetRef ref,
     ScheduledGameModel game,
   ) {
     return Container(
@@ -397,7 +401,7 @@ class GamesTab extends ConsumerWidget {
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: AppColors.mediumText),
                 color: AppColors.surface3,
-                onSelected: (value) {
+                onSelected: (value) async {
                   switch (value) {
                     case 'view_questions':
                       Navigator.push(
@@ -422,7 +426,7 @@ class GamesTab extends ConsumerWidget {
                       debugPrint('Start game: ${game.name}');
                       break;
                     case 'delete':
-                      debugPrint('Delete game: ${game.name}');
+                      await _deleteGame(context, ref, game);
                       break;
                   }
                 },
@@ -690,5 +694,92 @@ class GamesTab extends ConsumerWidget {
   void _navigateToManageCategories() {
     // Placeholder implementation for navigation
     debugPrint('Navigate to manage categories');
+  }
+
+  Future<void> _deleteGame(
+    BuildContext context,
+    WidgetRef ref,
+    ScheduledGameModel game,
+  ) async {
+    // Show confirmation dialog
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface2,
+          title: const Text(
+            'سڕینەوەی یاری',
+            style: TextStyle(color: AppColors.lightText),
+          ),
+          content: Text(
+            'دڵنیایت لە سڕینەوەی یاریی "${game.name}"؟\nئەم کردارە گەڕانەوەی نییە.',
+            style: const TextStyle(color: AppColors.mediumText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text(
+                'پاشگەزبوونەوە',
+                style: TextStyle(color: AppColors.mediumText),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+              child: const Text(
+                'سڕینەوە',
+                style: TextStyle(color: AppColors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      try {
+        // Show loading
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('سڕینەوەی یاری...'),
+              backgroundColor: AppColors.primaryTeal,
+            ),
+          );
+        }
+
+        // Delete the game using the provider
+        final success = await ref
+            .read(scheduledGameNotifierProvider.notifier)
+            .deleteGame(game.id);
+
+        if (context.mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('یاریی "${game.name}" بە سەرکەوتووی سڕایەوە'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('هەڵەیەک ڕوویدا لە سڕینەوەی یاری'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('هەڵەیەک ڕوویدا: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    }
   }
 }
