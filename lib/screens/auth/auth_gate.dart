@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../admin/admin_home_screen.dart';
+import '../home/home_screen.dart';
 import 'login_screen.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -22,38 +23,8 @@ class AuthGate extends ConsumerWidget {
           return const AdminHomeScreen();
         }
 
-        // Regular user goes to home screen (for now just show a message)
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('بەخێربێیت'),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            actions: [
-              IconButton(
-                onPressed: () async {
-                  try {
-                    await ref.read(authNotifierProvider.notifier).signOut();
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('هەڵە لە چوونەدەرەوە: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.logout),
-                tooltip: 'چوونەدەرەوە',
-              ),
-            ],
-          ),
-          body: const Center(
-            child: Text(
-              'بەخێربێیت! ماڵپەڕی سەرەکی بەزووی دێت...',
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-        );
+        // Regular user goes to home screen
+        return const HomeScreen();
       },
       loading:
           () =>
