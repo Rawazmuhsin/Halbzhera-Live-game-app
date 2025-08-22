@@ -2,15 +2,17 @@
 // Description: Welcome message widget
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
+import '../../providers/auth_provider.dart';
 
-class WelcomeSection extends StatelessWidget {
-  final String userName;
-
-  const WelcomeSection({super.key, required this.userName});
+class WelcomeSection extends ConsumerWidget {
+  const WelcomeSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(authStateProvider);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimensions.paddingXL),
@@ -35,14 +37,45 @@ class WelcomeSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            'بەخێرهاتنەوە، $userName!',
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w700,
-              color: AppColors.lightText,
+          userAsync.when(
+            data: (user) {
+              String displayName = 'کاربەر';
+              if (user != null) {
+                if (user.displayName?.isNotEmpty == true) {
+                  displayName = user.displayName!;
+                } else if (user.email?.isNotEmpty == true) {
+                  // Extract name from email (before @)
+                  displayName = user.email!.split('@').first;
+                }
+              }
+              return Text(
+                'بەخێرهاتنەوە، $displayName!',
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.lightText,
+                ),
+                textAlign: TextAlign.center,
+              );
+            },
+            loading: () => const Text(
+              'بەخێرهاتنەوە!',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: AppColors.lightText,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
+            error: (_, __) => const Text(
+              'بەخێرهاتنەوە!',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: AppColors.lightText,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
           const SizedBox(height: AppDimensions.paddingS),
           Text(

@@ -15,12 +15,11 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-
-  final String userName = "Ahmad";
 
   @override
   void initState() {
@@ -67,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    WelcomeSection(userName: userName),
+                    const WelcomeSection(),
                     const SizedBox(height: AppDimensions.paddingXL),
                     const NavigationGrid(),
                     const SizedBox(height: AppDimensions.paddingXL),
