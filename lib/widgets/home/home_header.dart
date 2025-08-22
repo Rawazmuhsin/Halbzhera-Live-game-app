@@ -81,10 +81,7 @@ class HomeHeader extends ConsumerWidget implements PreferredSizeWidget {
               }
             }
           },
-          icon: const Icon(
-            Icons.logout,
-            color: AppColors.lightText,
-          ),
+          icon: const Icon(Icons.logout, color: AppColors.lightText),
           tooltip: 'چوونەدەرەوە',
         ),
       ],

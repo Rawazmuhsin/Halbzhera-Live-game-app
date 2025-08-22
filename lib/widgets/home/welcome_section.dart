@@ -58,24 +58,26 @@ class WelcomeSection extends ConsumerWidget {
                 textAlign: TextAlign.center,
               );
             },
-            loading: () => const Text(
-              'بەخێرهاتنەوە!',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-                color: AppColors.lightText,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            error: (_, __) => const Text(
-              'بەخێرهاتنەوە!',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-                color: AppColors.lightText,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            loading:
+                () => const Text(
+                  'بەخێرهاتنەوە!',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.lightText,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+            error:
+                (_, __) => const Text(
+                  'بەخێرهاتنەوە!',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.lightText,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
           ),
           const SizedBox(height: AppDimensions.paddingS),
           Text(

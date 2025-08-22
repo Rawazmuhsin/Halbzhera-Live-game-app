@@ -45,53 +45,51 @@ class GamesList extends ConsumerWidget {
               ),
             );
           },
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(AppDimensions.paddingXL),
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryRed),
-              ),
-            ),
-          ),
-          error: (error, stack) => Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppDimensions.paddingXL),
-            decoration: BoxDecoration(
-              color: AppColors.error.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
-              border: Border.all(
-                color: AppColors.error.withOpacity(0.2),
-              ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: AppColors.error,
-                ),
-                const SizedBox(height: AppDimensions.paddingM),
-                Text(
-                  'هەڵەیەک ڕوویدا لە بارکردنی یارییەکان',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.error,
+          loading:
+              () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppDimensions.paddingXL),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.primaryRed,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppDimensions.paddingS),
-                Text(
-                  'تکایە دواتر هەوڵبدەوە',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.mediumText,
-                  ),
-                  textAlign: TextAlign.center,
+              ),
+          error:
+              (error, stack) => Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppDimensions.paddingXL),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
+                  border: Border.all(color: AppColors.error.withOpacity(0.2)),
                 ),
-              ],
-            ),
-          ),
+                child: Column(
+                  children: [
+                    Icon(Icons.error_outline, size: 48, color: AppColors.error),
+                    const SizedBox(height: AppDimensions.paddingM),
+                    Text(
+                      'هەڵەیەک ڕوویدا لە بارکردنی یارییەکان',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.error,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppDimensions.paddingS),
+                    Text(
+                      'تکایە دواتر هەوڵبدەوە',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.mediumText,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
         ),
       ],
     );
