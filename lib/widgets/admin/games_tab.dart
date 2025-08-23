@@ -7,6 +7,7 @@ import '../../utils/constants.dart';
 import '../../providers/live_game_provider.dart';
 import '../../providers/quiz_provider.dart';
 import '../../providers/scheduled_game_provider.dart';
+import '../../providers/joined_user_provider.dart';
 import '../../widgets/common/loading_widget.dart';
 import '../../models/live_game_model.dart';
 import '../../models/scheduled_game_model.dart';
@@ -413,6 +414,9 @@ class GamesTab extends ConsumerWidget {
                         ),
                       );
                       break;
+                    case 'view_participants':
+                      await _showParticipantsDialog(context, ref, game);
+                      break;
                     case 'edit':
                       Navigator.push(
                         context,
@@ -444,6 +448,23 @@ class GamesTab extends ConsumerWidget {
                             SizedBox(width: 8),
                             Text(
                               'بینینی پرسیارەکان',
+                              style: TextStyle(color: AppColors.lightText),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'view_participants',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.people,
+                              color: AppColors.accentYellow,
+                              size: 16,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'بینینی بەشداربووان',
                               style: TextStyle(color: AppColors.lightText),
                             ),
                           ],
@@ -781,5 +802,272 @@ class GamesTab extends ConsumerWidget {
         }
       }
     }
+  }
+
+  Future<void> _showParticipantsDialog(
+    BuildContext context,
+    WidgetRef ref,
+    ScheduledGameModel game,
+  ) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          backgroundColor: AppColors.surface2,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.7,
+            padding: const EdgeInsets.all(AppDimensions.paddingL),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'بەشداربووانی ${game.name}',
+                      style: const TextStyle(
+                        color: AppColors.lightText,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      icon: const Icon(Icons.close, color: AppColors.lightText),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.paddingM),
+                Expanded(
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final joinedUsersAsync = ref.watch(
+                        joinedUsersProvider(game.id),
+                      );
+
+                      return joinedUsersAsync.when(
+                        data: (joinedUsers) {
+                          if (joinedUsers.isEmpty) {
+                            return const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.people_outline,
+                                    size: 64,
+                                    color: AppColors.mediumText,
+                                  ),
+                                  SizedBox(height: AppDimensions.paddingM),
+                                  Text(
+                                    'هیچ بەشداربووێک نییە',
+                                    style: TextStyle(
+                                      color: AppColors.mediumText,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: joinedUsers.length,
+                            itemBuilder: (context, index) {
+                              if (index < 0 || index >= joinedUsers.length) {
+                                return const SizedBox.shrink(); // Safeguard against invalid indices
+                              }
+
+                              final joinedUser = joinedUsers[index];
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                  bottom: AppDimensions.paddingS,
+                                ),
+                                padding: const EdgeInsets.all(
+                                  AppDimensions.paddingM,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface3,
+                                  borderRadius: BorderRadius.circular(
+                                    AppDimensions.radiusM,
+                                  ),
+                                  border: Border.all(color: AppColors.border1),
+                                ),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: AppColors.primaryRed,
+                                      backgroundImage:
+                                          joinedUser.userPhotoUrl != null
+                                              ? NetworkImage(
+                                                joinedUser.userPhotoUrl!,
+                                              )
+                                              : null,
+                                      child:
+                                          (joinedUser.userDisplayName != null &&
+                                                  joinedUser
+                                                      .userDisplayName!
+                                                      .isNotEmpty)
+                                              ? Text(
+                                                joinedUser.userDisplayName!
+                                                    .substring(0, 1)
+                                                    .toUpperCase(),
+                                                style: const TextStyle(
+                                                  color: AppColors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              )
+                                              : (joinedUser.userEmail.isNotEmpty
+                                                  ? Text(
+                                                    joinedUser.userEmail
+                                                        .substring(0, 1)
+                                                        .toUpperCase(),
+                                                    style: const TextStyle(
+                                                      color: AppColors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )
+                                                  : Text(
+                                                    '?',
+                                                    style: const TextStyle(
+                                                      color: AppColors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  )),
+                                    ),
+                                    const SizedBox(
+                                      width: AppDimensions.paddingM,
+                                    ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            joinedUser.userDisplayName ??
+                                                joinedUser.userEmail,
+                                            style: const TextStyle(
+                                              color: AppColors.lightText,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          if (joinedUser.userDisplayName !=
+                                              null)
+                                            Text(
+                                              joinedUser.userEmail,
+                                              style: const TextStyle(
+                                                color: AppColors.mediumText,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          if (joinedUser.accountType ==
+                                                  'guest' &&
+                                              joinedUser.guestAccountNumber !=
+                                                  null)
+                                            Text(
+                                              'ژمارەی هەژمار: ${joinedUser.guestAccountNumber}',
+                                              style: const TextStyle(
+                                                color: AppColors.accentYellow,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                joinedUser.accountType ==
+                                                        'guest'
+                                                    ? AppColors.accentYellow
+                                                        .withOpacity(0.2)
+                                                    : AppColors.primaryTeal
+                                                        .withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            joinedUser.accountType == 'guest'
+                                                ? 'میوان'
+                                                : 'تۆمارکراو',
+                                            style: TextStyle(
+                                              color:
+                                                  joinedUser.accountType ==
+                                                          'guest'
+                                                      ? AppColors.accentYellow
+                                                      : AppColors.primaryTeal,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${joinedUser.joinedAt.day}/${joinedUser.joinedAt.month}',
+                                          style: const TextStyle(
+                                            color: AppColors.mediumText,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        loading:
+                            () => const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primaryRed,
+                                ),
+                              ),
+                            ),
+                        error:
+                            (error, _) => Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: AppColors.error,
+                                  ),
+                                  const SizedBox(
+                                    height: AppDimensions.paddingM,
+                                  ),
+                                  Text(
+                                    'هەڵەیەک ڕوویدا: $error',
+                                    style: const TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 14,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
