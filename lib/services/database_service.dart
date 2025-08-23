@@ -8,6 +8,7 @@ import '../models/live_game_model.dart';
 import '../models/scheduled_game_model.dart';
 import '../models/question_model.dart';
 import '../models/category_model.dart';
+import '../models/joined_user_model.dart';
 
 class DatabaseService {
   final FirebaseFirestore _firestore = FirebaseConfig.firestore;
@@ -1257,6 +1258,144 @@ class DatabaseService {
       await FirebaseConfig.getQuestionDoc(questionId).delete();
     } catch (e) {
       throw Exception('Failed to delete question: $e');
+    }
+  }
+
+  // ============================================================================
+  // JOINED USERS METHODS
+  // ============================================================================
+
+  // Add user to joined_users collection when they join a game
+  Future<String> joinGame({
+    required String gameId,
+    required String userId,
+    required String userEmail,
+    String? userDisplayName,
+    String? userPhotoUrl,
+    required String accountType,
+    String? guestAccountNumber,
+  }) async {
+    try {
+      // Check if user already joined this game
+      final existingJoin =
+          await _firestore
+              .collection('joined_users')
+              .where('gameId', isEqualTo: gameId)
+              .where('userId', isEqualTo: userId)
+              .where('isActive', isEqualTo: true)
+              .get();
+
+      if (existingJoin.docs.isNotEmpty) {
+        throw Exception('کاربەر پێشتر بەشداری ئەم یارییە کردووە');
+      }
+
+      // Create joined user document
+      final joinedUserData = {
+        'gameId': gameId,
+        'userId': userId,
+        'userEmail': userEmail,
+        'userDisplayName': userDisplayName,
+        'userPhotoUrl': userPhotoUrl,
+        'accountType': accountType,
+        'guestAccountNumber': guestAccountNumber,
+        'joinedAt': Timestamp.now(),
+        'isActive': true,
+      };
+
+      final docRef = await _firestore
+          .collection('joined_users')
+          .add(joinedUserData);
+
+      return docRef.id;
+    } catch (e) {
+      throw Exception('Failed to join game: $e');
+    }
+  }
+
+  // Get joined users for a specific game
+  Stream<List<JoinedUserModel>> getJoinedUsersStream(String gameId) {
+    return _firestore
+        .collection('joined_users')
+        .where('gameId', isEqualTo: gameId)
+        .where('isActive', isEqualTo: true)
+        .orderBy('joinedAt', descending: false)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => JoinedUserModel.fromFirestore(doc))
+                  .toList(),
+        );
+  }
+
+  // Get all games joined by a specific user
+  Stream<List<JoinedUserModel>> getUserJoinedGamesStream(String userId) {
+    return _firestore
+        .collection('joined_users')
+        .where('userId', isEqualTo: userId)
+        .where('isActive', isEqualTo: true)
+        .orderBy('joinedAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs
+                  .map((doc) => JoinedUserModel.fromFirestore(doc))
+                  .toList(),
+        );
+  }
+
+  // Check if user has joined a specific game
+  Future<bool> hasUserJoinedGame(String gameId, String userId) async {
+    try {
+      final result =
+          await _firestore
+              .collection('joined_users')
+              .where('gameId', isEqualTo: gameId)
+              .where('userId', isEqualTo: userId)
+              .where('isActive', isEqualTo: true)
+              .get();
+
+      return result.docs.isNotEmpty;
+    } catch (e) {
+      throw Exception('Failed to check if user joined game: $e');
+    }
+  }
+
+  // Remove user from game (set isActive to false)
+  Future<void> leaveGame(String gameId, String userId) async {
+    try {
+      final joinedUserDocs =
+          await _firestore
+              .collection('joined_users')
+              .where('gameId', isEqualTo: gameId)
+              .where('userId', isEqualTo: userId)
+              .where('isActive', isEqualTo: true)
+              .get();
+
+      for (final doc in joinedUserDocs.docs) {
+        await doc.reference.update({
+          'isActive': false,
+          'leftAt': Timestamp.now(),
+        });
+      }
+    } catch (e) {
+      throw Exception('Failed to leave game: $e');
+    }
+  }
+
+  // Get count of joined users for a game
+  Future<int> getJoinedUserCount(String gameId) async {
+    try {
+      final result =
+          await _firestore
+              .collection('joined_users')
+              .where('gameId', isEqualTo: gameId)
+              .where('isActive', isEqualTo: true)
+              .get();
+
+      return result.docs.length;
+    } catch (e) {
+      throw Exception('Failed to get joined user count: $e');
     }
   }
 }

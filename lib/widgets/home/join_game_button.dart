@@ -5,9 +5,18 @@ import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 
 class JoinGameButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final String? text;
+  final Color? backgroundColor;
+  final Color? textColor;
 
-  const JoinGameButton({super.key, required this.onPressed});
+  const JoinGameButton({
+    super.key,
+    required this.onPressed,
+    this.text,
+    this.backgroundColor,
+    this.textColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +25,19 @@ class JoinGameButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryRed,
-          foregroundColor: AppColors.white,
+          backgroundColor: backgroundColor ?? AppColors.primaryRed,
+          foregroundColor: textColor ?? AppColors.white,
           padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingM),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppDimensions.radiusL),
           ),
-          elevation: 4,
+          elevation: onPressed != null ? 4 : 0,
+          disabledBackgroundColor: AppColors.mediumText,
+          disabledForegroundColor: AppColors.darkText,
         ),
-        child: const Text(
-          'بەشداری بکە',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        child: Text(
+          text ?? 'بەشداری بکە',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );

@@ -2,21 +2,27 @@
 // Description: Individual game card
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
-import '../../models/scheduled_game_model.dart'; // Use your existing model
+import '../../models/scheduled_game_model.dart';
+import '../../providers/joined_user_provider.dart';
+import '../../providers/auth_provider.dart';
 import 'game_category_badge.dart';
 import 'game_title.dart';
 import 'game_description.dart';
 import 'game_details.dart';
 import 'join_game_button.dart';
 
-class GameCard extends StatelessWidget {
+class GameCard extends ConsumerWidget {
   final ScheduledGameModel game;
 
   const GameCard({super.key, required this.game});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasJoinedAsync = ref.watch(hasUserJoinedGameProvider(game.id));
+    final isLoading = ref.watch(joinGameLoadingProvider);
+
     return Container(
       padding: const EdgeInsets.all(AppDimensions.paddingXL),
       decoration: BoxDecoration(
@@ -48,7 +54,26 @@ class GameCard extends StatelessWidget {
             prize: game.prize,
           ),
           const SizedBox(height: AppDimensions.paddingL),
-          JoinGameButton(onPressed: () => _joinGame(context)),
+          hasJoinedAsync.when(
+            data: (hasJoined) {
+              if (hasJoined) {
+                return _buildJoinedButton(context, ref);
+              } else {
+                return JoinGameButton(
+                  onPressed: isLoading ? null : () => _joinGame(context, ref),
+                );
+              }
+            },
+            loading:
+                () => const JoinGameButton(
+                  onPressed: null, // Disabled while loading
+                  text: 'بارکردن...',
+                ),
+            error:
+                (_, __) => JoinGameButton(
+                  onPressed: isLoading ? null : () => _joinGame(context, ref),
+                ),
+          ),
         ],
       ),
     );
@@ -84,12 +109,191 @@ class GameCard extends StatelessWidget {
     }
   }
 
-  void _joinGame(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('بەشداری کردن لە یاری: ${game.name}'),
-        backgroundColor: AppColors.primaryRed,
-      ),
+  void _joinGame(BuildContext context, WidgetRef ref) async {
+    final currentUser = ref.read(currentUserProvider);
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تکایە سەرەتا چوارچێوەکە بکەرەوە'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Check if user is guest (anonymous) and needs account number
+    String? guestAccountNumber;
+    if (currentUser.isAnonymous) {
+      guestAccountNumber = await _showGuestAccountDialog(context);
+      if (guestAccountNumber == null || guestAccountNumber.isEmpty) {
+        return; // User cancelled or didn't provide account number
+      }
+    }
+
+    try {
+      final joinId = await ref
+          .read(joinedUserNotifierProvider.notifier)
+          .joinGame(gameId: game.id, guestAccountNumber: guestAccountNumber);
+
+      if (joinId != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('بە سەرکەوتووی بەشداری یاریی "${game.name}" کرد'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('هەڵە لە بەشداری کردن: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildJoinedButton(BuildContext context, WidgetRef ref) {
+    // Show the participation screen button (disabled for now)
+    return JoinGameButton(
+      onPressed: null, // Will be implemented later
+      text: 'شاشەی بەژداربون',
+      backgroundColor: AppColors.primaryTeal,
+      textColor: AppColors.white,
+    );
+  }
+
+  void _leaveGame(BuildContext context, WidgetRef ref) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface2,
+          title: const Text(
+            'جێهێشتنی یاری',
+            style: TextStyle(color: AppColors.lightText),
+          ),
+          content: Text(
+            'دڵنیایت لە جێهێشتنی یاریی "${game.name}"؟',
+            style: const TextStyle(color: AppColors.mediumText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text(
+                'پاشگەزبوونەوە',
+                style: TextStyle(color: AppColors.mediumText),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+              child: const Text(
+                'جێهێشتن',
+                style: TextStyle(color: AppColors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      try {
+        final success = await ref
+            .read(joinedUserNotifierProvider.notifier)
+            .leaveGame(game.id);
+
+        if (success && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('بە سەرکەوتووی یاریی "${game.name}" جێهێشت'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('هەڵە لە جێهێشتنی یاری: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<String?> _showGuestAccountDialog(BuildContext context) async {
+    final controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface2,
+          title: const Text(
+            'ژمارەی هەژمار',
+            style: TextStyle(color: AppColors.lightText),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'تکایە ژمارەی هەژمارت بنووسە:',
+                style: TextStyle(color: AppColors.mediumText),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                style: const TextStyle(color: AppColors.lightText),
+                decoration: InputDecoration(
+                  hintText: 'ژمارەی هەژمار',
+                  hintStyle: TextStyle(color: AppColors.mediumText),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border1),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.border1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: AppColors.primaryRed),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(null),
+              child: const Text(
+                'پاشگەزبوونەوە',
+                style: TextStyle(color: AppColors.mediumText),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final accountNumber = controller.text.trim();
+                Navigator.of(dialogContext).pop(accountNumber);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryRed,
+              ),
+              child: const Text(
+                'دووپاتکردنەوە',
+                style: TextStyle(color: AppColors.white),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
