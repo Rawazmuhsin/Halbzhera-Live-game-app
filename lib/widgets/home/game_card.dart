@@ -1,5 +1,5 @@
 // File: lib/widgets/home/game_card.dart
-// Description: Individual game card
+// Description: Individual game card with lobby navigation
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +7,7 @@ import '../../utils/constants.dart';
 import '../../models/scheduled_game_model.dart';
 import '../../providers/joined_user_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../screens/games/lobby_screen.dart';
 import 'game_category_badge.dart';
 import 'game_title.dart';
 import 'game_description.dart';
@@ -57,21 +58,20 @@ class GameCard extends ConsumerWidget {
           hasJoinedAsync.when(
             data: (hasJoined) {
               if (hasJoined) {
-                return _buildJoinedButton(context, ref);
+                return _buildJoinedButtons(context, ref);
               } else {
                 return JoinGameButton(
                   onPressed: isLoading ? null : () => _joinGame(context, ref),
+                  text: 'بەشداری بکە',
                 );
               }
             },
             loading:
-                () => const JoinGameButton(
-                  onPressed: null, // Disabled while loading
-                  text: 'بارکردن...',
-                ),
+                () => const JoinGameButton(onPressed: null, text: 'بارکردن...'),
             error:
                 (_, __) => JoinGameButton(
                   onPressed: isLoading ? null : () => _joinGame(context, ref),
+                  text: 'بەشداری بکە',
                 ),
           ),
         ],
@@ -155,13 +155,106 @@ class GameCard extends ConsumerWidget {
     }
   }
 
-  Widget _buildJoinedButton(BuildContext context, WidgetRef ref) {
-    // Show the participation screen button (disabled for now)
-    return JoinGameButton(
-      onPressed: null, // Will be implemented later
-      text: 'شاشەی بەژداربون',
-      backgroundColor: AppColors.primaryTeal,
-      textColor: AppColors.white,
+  Widget _buildJoinedButtons(BuildContext context, WidgetRef ref) {
+    final now = DateTime.now();
+    final gameTime = game.scheduledTime;
+    final timeDifference = gameTime.difference(now);
+
+    // Check if game has started (scheduled time has passed)
+    final hasGameStarted = timeDifference.inSeconds <= 0;
+
+    return Column(
+      children: [
+        // Lobby Button - Always available if user joined
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => _navigateToLobby(context, hasGameStarted),
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  hasGameStarted
+                      ? AppColors
+                          .primaryRed // Red if game started (active lobby)
+                      : AppColors
+                          .primaryTeal, // Teal if waiting (preview lobby)
+              foregroundColor: AppColors.white,
+              padding: const EdgeInsets.symmetric(
+                vertical: AppDimensions.paddingM,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+              ),
+              elevation: 4,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  hasGameStarted ? Icons.play_arrow : Icons.people,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  hasGameStarted
+                      ? 'چوونە ناو لۆبی' // Active lobby (1-minute countdown)
+                      : 'بینینی لۆبی', // Preview lobby (waiting state)
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppDimensions.paddingM),
+
+        // Leave Game Button
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => _leaveGame(context, ref),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.error),
+              foregroundColor: AppColors.error,
+              padding: const EdgeInsets.symmetric(
+                vertical: AppDimensions.paddingM,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.exit_to_app, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'جێهێشتنی یاری',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _navigateToLobby(BuildContext context, bool hasGameStarted) {
+    // Always allow lobby access for joined users
+    // The lobby screen itself will handle the different states
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => LobbyScreen(
+              game: game,
+              isPreviewMode: !hasGameStarted, // Preview if game hasn't started
+            ),
+      ),
     );
   }
 
