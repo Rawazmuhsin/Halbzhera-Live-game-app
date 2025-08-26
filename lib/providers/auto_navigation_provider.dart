@@ -4,7 +4,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/scheduled_game_model.dart';
-import '../models/joined_user_model.dart';
 import 'scheduled_game_provider.dart';
 import 'joined_user_provider.dart';
 import 'auth_provider.dart';

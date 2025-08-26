@@ -8,8 +8,10 @@ import '../../widgets/lobby/status_message.dart';
 import '../../widgets/lobby/users_list.dart';
 import '../../models/scheduled_game_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/joined_user_model.dart';
 import '../../providers/joined_user_provider.dart';
+import 'question_screen.dart';
+import '../../providers/live_game_provider.dart';
+import '../../config/firebase_config.dart';
 
 class LobbyScreen extends ConsumerStatefulWidget {
   final ScheduledGameModel game;
@@ -212,23 +214,57 @@ class _LobbyScreenState extends ConsumerState<LobbyScreen>
     }
   }
 
-  void _redirectToQuestionScreen() {
-    // Navigate to question screen
-    // TODO: Implement navigation to question screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('یاری دەست پێکرد! بەرەو پرسیارەکان...'),
-        backgroundColor: AppColors.success,
-      ),
-    );
+  Future<bool> _doesGameExist(String gameId) async {
+    try {
+      final gameDoc = await FirebaseConfig.getLiveGameDoc(gameId).get();
+      return gameDoc.exists;
+    } catch (e) {
+      return false;
+    }
+  }
 
-    // Navigate to the game questions screen
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => QuestionScreen(game: widget.game),
-    //   ),
-    // );
+  Future<void> _createGameDocument(String gameId) async {
+    try {
+      await FirebaseConfig.getLiveGameDoc(
+        gameId,
+      ).set({'status': 'pending', 'createdAt': DateTime.now()});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to create game document: $e")),
+      );
+    }
+  }
+
+  Future<void> _redirectToQuestionScreen() async {
+    final gameId = widget.game.id;
+    try {
+      // Check if the game document exists
+      final gameExists = await _doesGameExist(gameId);
+      if (!gameExists) {
+        await _createGameDocument(gameId);
+      }
+
+      // Fetch all questions for the game
+      final questions = await _fetchQuestions(gameId);
+
+      // 1. Start the game (set status to live in Firestore)
+      await ref
+          .read(adminLiveGameNotifierProvider.notifier)
+          .startLiveGame(gameId);
+
+      // 2. Navigate to the QuestionScreen with questions
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder:
+              (context) => QuestionScreen(gameId: gameId, questions: questions),
+        ),
+      );
+    } catch (e) {
+      // 3. Handle errors
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to start the game: $e")));
+    }
   }
 
   void _leaveGame() async {
@@ -257,6 +293,27 @@ class _LobbyScreenState extends ConsumerState<LobbyScreen>
     if (shouldLeave == true) {
       // TODO: Handle leaving game logic
       Navigator.pop(context);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchQuestions(String gameId) async {
+    try {
+      final questionsSnapshot =
+          await FirebaseConfig.firestore
+              .collection('questions')
+              .where('gameId', isEqualTo: gameId)
+              .get();
+
+      if (questionsSnapshot.docs.isEmpty) {
+        return [];
+      }
+
+      return questionsSnapshot.docs.map((doc) => doc.data()).toList();
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to fetch questions: $e")));
+      return [];
     }
   }
 

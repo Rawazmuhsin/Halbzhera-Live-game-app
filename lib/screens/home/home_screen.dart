@@ -58,48 +58,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Future<void> _navigateToLobby(ScheduledGameModel game) async {
     if (!mounted) return;
 
-    // Show notification
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.sports_esports, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                '🎮 ${game.name} دەست پێکرد! چوونە ناو لۆبی...',
-                style: const TextStyle(fontSize: 16),
+    try {
+      // Show notification
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.sports_esports, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '🎮 ${game.name} دەست پێکرد! چوونە ناو لۆبی...',
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          backgroundColor: AppColors.success,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+          ),
         ),
-        backgroundColor: AppColors.success,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+      );
+
+      // Small delay for user to see the notification
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      if (!mounted) return;
+
+      // Navigate to lobby
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder:
+              (_) => LobbyScreen(
+                game: game,
+                isPreviewMode: false, // Game has started
+              ),
         ),
-      ),
-    );
+      );
 
-    // Small delay for user to see the notification
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    if (!mounted) return;
-
-    // Navigate to lobby
-    await Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder:
-            (_) => LobbyScreen(
-              game: game,
-              isPreviewMode: false, // Game has started
-            ),
-      ),
-    );
-
-    // Mark as navigated to prevent duplicate navigation
-    ref.read(autoNavigationProvider.notifier).markAsNavigated(game.id);
+      // Mark as navigated to prevent duplicate navigation
+      if (mounted) {
+        ref.read(autoNavigationProvider.notifier).markAsNavigated(game.id);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error navigating to lobby: $e')),
+        );
+      }
+    }
   }
 
   @override
