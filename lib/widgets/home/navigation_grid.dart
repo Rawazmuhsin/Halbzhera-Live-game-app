@@ -66,6 +66,20 @@ class _NavigationGridState extends State<NavigationGrid> {
 
   void _navigateToPage(String page) {
     print('Navigate to: $page');
-    // TODO: Implement navigation logic
+    switch (page) {
+      case 'leaderboard':
+        Navigator.of(context).pushNamed('/leaderboard');
+        break;
+      case 'settings':
+        // TODO: Implement settings navigation
+        break;
+      case 'about':
+        // TODO: Implement about navigation
+        break;
+      case 'home':
+      default:
+        // Already on home, do nothing
+        break;
+    }
   }
 }
