@@ -11,9 +11,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Core App Providers & Models
 import '../../models/question_model.dart';
 import '../../providers/live_game_provider.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/auth_provider.dart' hide databaseServiceProvider;
 import '../../config/firebase_config.dart';
-// import '../../services/database_service.dart';
+import '../../services/game_result_service.dart';
+import '../../providers/database_provider.dart';
+import '../../screens/games/results_screen.dart';
 
 // Provider that fetches all questions from Firestore
 final allQuestionsProvider = FutureProvider<List<Map<String, dynamic>>>((
@@ -172,8 +174,16 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
           timer.cancel();
           if (!_showResult) {
             if (_selectedAnswer == null) {
-              // Time's up without answering
+              // Time's up without answering - this counts as a wrong answer
               _checkAnswer(null);
+
+              // Mark as spectator because they didn't answer in time
+              setState(() {
+                _isSpectator = true;
+              });
+
+              // Eliminate player for not answering in time
+              _eliminatePlayer();
             }
             // Handle timer end - show results and check answer
             _handleTimerEnd();
@@ -217,6 +227,9 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       setState(() {
         _isSpectator = true;
       });
+
+      // Save elimination to Firestore
+      _eliminatePlayer();
     }
 
     // Wait for 3 seconds to show the result
@@ -237,11 +250,76 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       });
       _startQuestionTimer();
     } else {
-      // End of questions
+      // End of questions - User has completed all questions successfully
+      _completeGameAsWinner();
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('سەرجەم پرسیارەکان تەواو بوون!')),
       );
     }
+  }
+
+  void _completeGameAsWinner() {
+    // Get user ID from auth provider
+    final userId = ref.read(authStateProvider).value?.uid;
+    if (userId == null) return;
+
+    // Calculate score based on number of questions completed
+    final score = _allQuestions.length * 100;
+
+    // Save game result with user as winner
+    ref
+        .read(databaseServiceProvider)
+        .saveGameResult(
+          gameId: widget.gameId,
+          userId: userId,
+          score: score,
+          isWinner: true,
+          eliminatedAtQuestion: null, // Winner completed all questions
+        );
+
+    // Show celebration or navigate to results screen
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+
+      // Navigate to results screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => ResultsScreen(gameId: widget.gameId),
+        ),
+      );
+    });
+  }
+
+  void _eliminatePlayer() {
+    // Get user ID from auth provider
+    final userId = ref.read(authStateProvider).value?.uid;
+    if (userId == null) return;
+
+    // Calculate partial score based on questions answered correctly
+    final score = _currentQuestionIndex * 100; // 100 points per question
+
+    // Save game result with user as eliminated
+    ref
+        .read(databaseServiceProvider)
+        .saveGameResult(
+          gameId: widget.gameId,
+          userId: userId,
+          score: score,
+          isWinner: false,
+          eliminatedAtQuestion:
+              _currentQuestionIndex, // Current question where they were eliminated
+        );
+
+    // Show message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'بەداخەوە دەرچووی لە یارییەکە. دەتوانی سەیری پێشبڕکێکە بکەی!',
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   void _selectChoice(String choiceAnswer) {
