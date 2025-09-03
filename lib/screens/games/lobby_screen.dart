@@ -381,6 +381,36 @@ class _LobbyScreenState extends ConsumerState<LobbyScreen>
                         );
                       },
                     ),
+
+                    const SizedBox(height: AppDimensions.paddingXL),
+
+                    // Leaderboard Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _navigateToLeaderboard(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryTeal,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppDimensions.paddingM,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppDimensions.radiusL,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.emoji_events),
+                        label: const Text(
+                          'پێشەنگەکانی ئەم یارییە',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -389,6 +419,12 @@ class _LobbyScreenState extends ConsumerState<LobbyScreen>
         },
       ),
     );
+  }
+
+  void _navigateToLeaderboard(BuildContext context) {
+    Navigator.of(
+      context,
+    ).pushNamed('/game-leaderboard', arguments: {'gameId': widget.game.id});
   }
 
   Widget _buildGamePreview() {
