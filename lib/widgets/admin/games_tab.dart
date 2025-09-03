@@ -14,6 +14,7 @@ import '../../models/scheduled_game_model.dart';
 import '../../screens/admin/create_game_screen.dart';
 import '../../screens/admin/add_questions_screen.dart';
 import '../../screens/admin/section_questions_screen.dart';
+import '../../screens/admin/winners_screen.dart';
 
 class GamesTab extends ConsumerWidget {
   const GamesTab({super.key});
@@ -87,6 +88,20 @@ class GamesTab extends ConsumerWidget {
             label: const Text('بەشی نوێ زیادبکە'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryTeal,
+              padding: const EdgeInsets.all(AppDimensions.paddingM),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.paddingM),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () => _navigateToWinnersScreen(context),
+            icon: const Icon(Icons.emoji_events),
+            label: const Text('براوەکان'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFFFD700),
+              foregroundColor: AppColors.darkText,
               padding: const EdgeInsets.all(AppDimensions.paddingM),
             ),
           ),
@@ -715,6 +730,13 @@ class GamesTab extends ConsumerWidget {
   void _navigateToManageCategories() {
     // Placeholder implementation for navigation
     debugPrint('Navigate to manage categories');
+  }
+
+  void _navigateToWinnersScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AdminWinnersScreen()),
+    );
   }
 
   Future<void> _deleteGame(

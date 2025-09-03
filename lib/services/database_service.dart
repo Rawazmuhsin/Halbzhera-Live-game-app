@@ -1398,4 +1398,182 @@ class DatabaseService {
       throw Exception('Failed to get joined user count: $e');
     }
   }
+
+  // Migrate existing winners from game_results to winners collection
+  Future<void> migrateExistingWinners() async {
+    try {
+      // Get all winners from game_results collection
+      final snapshot =
+          await FirebaseFirestore.instance
+              .collection('game_results')
+              .where('isWinner', isEqualTo: true)
+              .get();
+
+      print('Found ${snapshot.docs.length} existing winners to migrate');
+
+      // Batch write to winners collection
+      final batch = FirebaseFirestore.instance.batch();
+      int migratedCount = 0;
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+
+        // Check if this winner already exists in the winners collection
+        final existingWinnerQuery =
+            await FirebaseFirestore.instance
+                .collection('winners')
+                .where('gameId', isEqualTo: data['gameId'])
+                .where('userId', isEqualTo: data['userId'])
+                .get();
+
+        if (existingWinnerQuery.docs.isEmpty) {
+          // Create a new document in winners collection with the same data
+          // Remove eliminatedAtQuestion field which doesn't apply to winners
+          final winnerData = Map<String, dynamic>.from(data);
+          winnerData.remove('eliminatedAtQuestion');
+          winnerData.remove('isWinner'); // Not needed in winners collection
+
+          final winnersRef =
+              FirebaseFirestore.instance.collection('winners').doc();
+          batch.set(winnersRef, winnerData);
+          migratedCount++;
+        }
+      }
+
+      if (migratedCount > 0) {
+        // Commit the batch
+        await batch.commit();
+        print(
+          'Successfully migrated $migratedCount winners to winners collection',
+        );
+      } else {
+        print('No new winners to migrate');
+      }
+    } catch (e) {
+      print('Error migrating winners: $e');
+      rethrow;
+    }
+  }
+
+  // ============================================================================
+  // LEADERBOARD OPERATIONS
+  // ============================================================================
+
+  // Get top winners across all games for the leaderboard
+  Future<List<Map<String, dynamic>>> getTopWinners({int limit = 10}) async {
+    try {
+      print('Fetching top $limit winners across all games');
+
+      // Query all winners
+      final winnersSnapshot =
+          await _firestore
+              .collection('winners')
+              .orderBy('completedAt', descending: true)
+              .limit(100) // Get more than we need for aggregation
+              .get();
+
+      if (winnersSnapshot.docs.isEmpty) {
+        print('No winners found in the database');
+        return [];
+      }
+
+      // Group winners by userId and aggregate their stats
+      final Map<String, Map<String, dynamic>> userStats = {};
+
+      for (final doc in winnersSnapshot.docs) {
+        final data = doc.data();
+        final userId = data['userId'] as String;
+
+        if (!userStats.containsKey(userId)) {
+          userStats[userId] = {
+            'userId': userId,
+            'displayName': data['userDisplayName'] ?? 'Unknown User',
+            'photoUrl': data['userPhotoUrl'],
+            'email': data['userEmail'],
+            'gamesWon': 0,
+            'totalScore': 0,
+            'lastWin': data['completedAt'],
+          };
+        }
+
+        userStats[userId]!['gamesWon'] =
+            (userStats[userId]!['gamesWon'] as int) + 1;
+        userStats[userId]!['totalScore'] =
+            (userStats[userId]!['totalScore'] as int) +
+            (data['score'] as int? ?? 0);
+
+        // Update last win time if this is more recent
+        final currentLastWin = userStats[userId]!['lastWin'];
+        final thisWin = data['completedAt'];
+        if (thisWin != null &&
+            (currentLastWin == null ||
+                (thisWin is Timestamp &&
+                    currentLastWin is Timestamp &&
+                    thisWin.compareTo(currentLastWin) > 0))) {
+          userStats[userId]!['lastWin'] = thisWin;
+        }
+      }
+
+      // Convert to list, sort by games won (descending) then total score
+      final List<Map<String, dynamic>> leaderboard = userStats.values.toList();
+      leaderboard.sort((a, b) {
+        final gamesComparison = (b['gamesWon'] as int).compareTo(
+          a['gamesWon'] as int,
+        );
+        if (gamesComparison != 0) return gamesComparison;
+        return (b['totalScore'] as int).compareTo(a['totalScore'] as int);
+      });
+
+      // Return top N users
+      return leaderboard.take(limit).toList();
+    } catch (e) {
+      print('Error getting top winners: $e');
+      return [];
+    }
+  }
+
+  // Get top winners for a specific game
+  Future<List<Map<String, dynamic>>> getGameTopWinners({
+    required String gameId,
+    int limit = 10,
+  }) async {
+    try {
+      print('Fetching top $limit winners for game $gameId');
+
+      // Query winners for this specific game - fetch all and sort in memory to avoid index requirements
+      final winnersSnapshot =
+          await _firestore
+              .collection('winners')
+              .where('gameId', isEqualTo: gameId)
+              .limit(100) // Get a reasonable number to sort locally
+              .get();
+
+      if (winnersSnapshot.docs.isEmpty) {
+        print('No winners found for game $gameId');
+        return [];
+      }
+
+      // Convert to list of maps with simplified structure
+      List<Map<String, dynamic>> results =
+          winnersSnapshot.docs.map((doc) {
+            final data = doc.data();
+            return {
+              'userId': data['userId'],
+              'displayName': data['userDisplayName'] ?? 'Unknown User',
+              'photoUrl': data['userPhotoUrl'],
+              'score': data['score'] ?? 0,
+              'completedAt': data['completedAt'],
+            };
+          }).toList();
+
+      // Sort by score in memory
+      results.sort((a, b) => (b['score'] as int).compareTo(a['score'] as int));
+
+      // Return just the top 'limit' entries
+      return results.take(limit).toList();
+    } catch (e) {
+      print('Error getting top winners for game: $e');
+      return [];
+    }
+  }
 }
