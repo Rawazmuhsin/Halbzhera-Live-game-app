@@ -467,7 +467,7 @@ extension GameResultOperations on DatabaseService {
       // Don't throw as this is a background task
     }
   }
-
+  
   // Get all winners across all games (for admin)
   Future<List<GameResultModel>> getAllGameWinners() async {
     try {

@@ -1516,12 +1516,18 @@ class DatabaseService {
 
       // Convert to list, sort by games won (descending) then total score
       final List<Map<String, dynamic>> leaderboard = userStats.values.toList();
+
+      // Convert totalScore to score for consistency in the UI
+      for (final user in leaderboard) {
+        user['score'] = user['totalScore'];
+      }
+
       leaderboard.sort((a, b) {
         final gamesComparison = (b['gamesWon'] as int).compareTo(
           a['gamesWon'] as int,
         );
         if (gamesComparison != 0) return gamesComparison;
-        return (b['totalScore'] as int).compareTo(a['totalScore'] as int);
+        return (b['score'] as int).compareTo(a['score'] as int);
       });
 
       // Return top N users

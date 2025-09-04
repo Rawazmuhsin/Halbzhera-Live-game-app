@@ -1,33 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:halbzhera/providers/database_provider.dart';
-import 'package:halbzhera/services/database_service.dart';
 import 'package:halbzhera/widgets/loading_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:halbzhera/utils/constants.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   final String? gameId;
 
   const LeaderboardScreen({
-    Key? key,
+    super.key,
     this.gameId, // If null, show global leaderboard
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   late Future<List<Map<String, dynamic>>> _leaderboardFuture;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _loadLeaderboard();
   }
 
@@ -48,25 +43,41 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
         title: Text(
-          widget.gameId != null ? 'بردەوەکانی ئەم یاریە' : 'خشتەی سەرکەوتووان',
+          widget.gameId != null ? 'پێشەنگەکانی ئەم یاریە' : 'پێشەنگەکان',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: AppColors.lightText,
+            shadows: [
+              Shadow(
+                offset: Offset(1.0, 1.0),
+                blurRadius: 3.0,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
+            ],
+          ),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [Tab(text: 'براوەکان'), Tab(text: 'ئامارەکان')],
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: AppColors.backgroundGradient,
+          ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_buildLeaderboardTab(), _buildStatsTab()],
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        child: _buildLeaderboardTab(),
       ),
     );
   }
@@ -90,36 +101,113 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
                 child: Text(
                   'هەڵەیەک ڕوویدا: ${snapshot.error}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppColors.error),
                 ),
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            print('No leaderboard data available');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.emoji_events_outlined,
-                    size: 80,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    widget.gameId != null
-                        ? 'هیچ براوەیەک نییە بۆ ئەم یارییە'
-                        : 'هێشتا هیچ براوەیەک نییە',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        _loadLeaderboard();
-                      });
+                  // Trophy icon with animation
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0.8, end: 1.0),
+                    duration: const Duration(seconds: 2),
+                    curve: Curves.elasticOut,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: AppColors.accentYellow.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.emoji_events_outlined,
+                              size: 80,
+                              color: AppColors.lightText,
+                            ),
+                          ),
+                        ),
+                      );
                     },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('تازەکردنەوە'),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Empty state message
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.white.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      widget.gameId != null
+                          ? 'هیچ پێشەنگێک نییە بۆ ئەم یارییە'
+                          : 'هێشتا هیچ پێشەنگێک نییە',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Refresh button with animation
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 1),
+                    duration: const Duration(milliseconds: 800),
+                    curve: Curves.easeOutBack,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _loadLeaderboard();
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: AppColors.lightText,
+                            backgroundColor: AppColors.accentYellow,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            elevation: 8,
+                            shadowColor: AppColors.accentYellow.withOpacity(
+                              0.5,
+                            ),
+                          ),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text(
+                            'تازەکردنەوە',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -127,277 +215,578 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
           }
 
           final winners = snapshot.data!;
-          return ListView.builder(
-            itemCount: winners.length,
-            itemBuilder: (context, index) {
-              final winner = winners[index];
+          // Debug log the data
+          print('Leaderboard data: ${winners.length} entries');
+          if (winners.isNotEmpty) {
+            print('First entry: ${winners.first}');
+          }
 
-              // Get appropriate medal color for top 3
-              Color? medalColor;
-              IconData medalIcon;
+          return CustomScrollView(
+            slivers: [
+              // Section for the top 3 players (podium style)
+              SliverToBoxAdapter(
+                child:
+                    winners.length >= 3
+                        ? _buildTopPodium(winners.sublist(0, 3))
+                        : winners.isNotEmpty
+                        ? _buildTopPodium(
+                          winners.sublist(
+                            0,
+                            winners.length < 3 ? winners.length : 3,
+                          ),
+                        )
+                        : const SizedBox.shrink(),
+              ),
 
-              if (index == 0) {
-                medalColor = Colors.amber;
-                medalIcon = Icons.looks_one;
-              } else if (index == 1) {
-                medalColor = Colors.grey.shade400;
-                medalIcon = Icons.looks_two;
-              } else if (index == 2) {
-                medalColor = Colors.brown.shade300;
-                medalIcon = Icons.looks_3;
-              } else {
-                medalColor = null;
-                medalIcon = Icons.emoji_events_outlined;
-              }
+              // Add extra spacing between top podium and list
+              SliverToBoxAdapter(
+                child: SizedBox(height: 20), // Extra spacing
+              ),
 
-              // Format timestamp if available
-              String timeAgo = '';
-              if (winner['completedAt'] != null || winner['lastWin'] != null) {
-                final timestamp =
-                    (winner['completedAt'] ?? winner['lastWin']) as Timestamp;
-                final date = timestamp.toDate();
-                timeAgo = DateFormat('yyyy-MM-dd HH:mm').format(date);
-              }
-
-              return Card(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 4.0,
-                ),
-                elevation: index < 3 ? 8 : 2,
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: medalColor,
-                    child:
-                        winner['photoUrl'] != null &&
-                                winner['photoUrl'].toString().isNotEmpty
-                            ? ClipOval(
-                              child: CachedNetworkImage(
-                                imageUrl: winner['photoUrl'],
-                                placeholder:
-                                    (context, url) =>
-                                        const CircularProgressIndicator(),
-                                errorWidget:
-                                    (context, url, error) => Icon(
-                                      Icons.person,
-                                      color:
-                                          medalColor != null
-                                              ? Colors.white
-                                              : null,
-                                    ),
-                                fit: BoxFit.cover,
-                                width: 40,
-                                height: 40,
-                              ),
-                            )
-                            : Icon(medalIcon, color: Colors.white),
-                  ),
-                  title: Text(
-                    winner['displayName'] ?? 'Unknown',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (widget.gameId == null && winner['gamesWon'] != null)
-                        Text('تەواوبوو: ${winner['gamesWon']} یاری'),
-                      if (winner['score'] != null)
-                        Text('خاڵ: ${winner['score']}'),
-                      if (timeAgo.isNotEmpty) Text(timeAgo),
-                    ],
-                  ),
-                  trailing: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.secondary,
-                    child: Text(
-                      '${index + 1}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+              // Title for the list section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.black.withOpacity(0.2),
+                          offset: const Offset(0, 3),
+                          blurRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.format_list_numbered,
+                          color: AppColors.lightText,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          'لیستی پێشەنگەکان',
+                          style: TextStyle(
+                            color: AppColors.lightText,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+
+              // List of all players
+              SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final player = winners[index];
+                  return _buildPlayerListItem(player, index);
+                }, childCount: winners.length),
+              ),
+
+              // Bottom spacing
+              const SliverToBoxAdapter(child: SizedBox(height: 30)),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _buildStatsTab() {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _leaderboardFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const LoadingWidget();
-        } else if (snapshot.hasError ||
-            !snapshot.hasData ||
-            snapshot.data!.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.bar_chart, size: 80, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  snapshot.hasError
-                      ? 'هەڵەیەک ڕوویدا: ${snapshot.error}'
-                      : 'داتا بەردەست نییە بۆ پیشاندانی ئامار',
-                  textAlign: TextAlign.center,
-                ),
-              ],
+  Widget _buildTopPodium(List<Map<String, dynamic>> topPlayers) {
+    // Make sure we have at least one player
+    if (topPlayers.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.only(
+        top: 20,
+        bottom: 20,
+      ), // Increased bottom padding
+      child: Column(
+        children: [
+          // Podium title
+          Container(
+            margin: const EdgeInsets.only(bottom: 30), // Increased margin to 30
+            child: const Text(
+              "🏆 پێشەنگەکان 🏆",
+              style: TextStyle(
+                fontSize: 22, // Slightly reduced font size
+                fontWeight: FontWeight.bold,
+                color: AppColors.lightText,
+                shadows: [
+                  Shadow(
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 3.0,
+                    color: Color.fromARGB(100, 0, 0, 0),
+                  ),
+                ],
+              ),
             ),
-          );
-        }
-
-        final winners = snapshot.data!;
-
-        // Calculate statistics
-        int totalParticipants = winners.length;
-        int totalGamesWon = 0;
-        int totalPoints = 0;
-
-        for (final winner in winners) {
-          totalGamesWon += (winner['gamesWon'] as int?) ?? 1;
-          totalPoints +=
-              (winner['totalScore'] as int?) ?? (winner['score'] as int?) ?? 0;
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildStatCard(
-                'بەشداربووان',
-                totalParticipants.toString(),
-                Icons.people,
-                Colors.blue,
-              ),
-              _buildStatCard(
-                'کۆی یاری تەواوکراو',
-                totalGamesWon.toString(),
-                Icons.emoji_events,
-                Colors.amber,
-              ),
-              _buildStatCard(
-                'کۆی خاڵ',
-                totalPoints.toString(),
-                Icons.score,
-                Colors.green,
-              ),
-              const SizedBox(height: 20),
-              if (winners.isNotEmpty) ...[
-                const Text(
-                  'براوەی یەکەم',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                _buildTopPlayerCard(winners.first),
-              ],
-            ],
           ),
-        );
-      },
-    );
-  }
 
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundColor: color.withOpacity(0.2),
-              child: Icon(icon, color: color, size: 30),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 40),
+
+          // Podium display
+          SizedBox(
+            height: 320, // Increased height to accommodate the content
+            child: Stack(
+              alignment: Alignment.bottomCenter,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+                // Podium platforms
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 2nd Place (left)
+                    if (topPlayers.length >= 2)
+                      _buildPodiumStand(
+                        topPlayers[1],
+                        height: 150, // Reduced height
+                        color: const Color(0xFFC0C0C0),
+                        position: 2,
+                        width: 100,
+                      ),
+
+                    const SizedBox(width: 8),
+
+                    // 1st Place (center)
+                    if (topPlayers.isNotEmpty)
+                      _buildPodiumStand(
+                        topPlayers[0],
+                        height: 180, // Reduced height
+                        color: const Color(0xFFFFD700),
+                        position: 1,
+                        width: 120,
+                        showCrown: true,
+                      ),
+
+                    const SizedBox(width: 8),
+
+                    // 3rd Place (right)
+                    if (topPlayers.length >= 3)
+                      _buildPodiumStand(
+                        topPlayers[2],
+                        height: 120, // Reduced height
+                        color: const Color(0xFFCD7F32),
+                        position: 3,
+                        width: 100,
+                      ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTopPlayerCard(Map<String, dynamic> winner) {
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+  Widget _buildPodiumStand(
+    Map<String, dynamic> player, {
+    required double height,
+    required Color color,
+    required int position,
+    required double width,
+    bool showCrown = false,
+  }) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min, // Use min size to prevent overflow
+      children: [
+        // Player avatar with optional crown
+        Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.amber,
-              child:
-                  winner['photoUrl'] != null &&
-                          winner['photoUrl'].toString().isNotEmpty
-                      ? ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: winner['photoUrl'],
-                          placeholder:
-                              (context, url) =>
-                                  const CircularProgressIndicator(),
-                          errorWidget:
-                              (context, url, error) => const Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 50,
-                              ),
-                          fit: BoxFit.cover,
-                          width: 90,
-                          height: 90,
+            // Player avatar
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: color, width: 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.5),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: position == 1 ? 36 : 28, // Slightly reduced radius
+                backgroundColor: color,
+                child:
+                    player['photoUrl'] != null &&
+                            player['photoUrl'].toString().isNotEmpty
+                        ? ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: player['photoUrl'],
+                            placeholder:
+                                (context, url) =>
+                                    const CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.white,
+                                    ),
+                            errorWidget:
+                                (context, url, error) => Icon(
+                                  Icons.person,
+                                  color: AppColors.white,
+                                  size: position == 1 ? 36 : 28,
+                                ),
+                            fit: BoxFit.cover,
+                            width: position == 1 ? 72 : 56,
+                            height: position == 1 ? 72 : 56,
+                          ),
+                        )
+                        : Icon(
+                          Icons.person,
+                          color: AppColors.white,
+                          size: position == 1 ? 36 : 28,
                         ),
-                      )
-                      : const Icon(
-                        Icons.emoji_events,
-                        color: Colors.white,
-                        size: 50,
+              ),
+            ),
+
+            // Crown for 1st place
+            if (showCrown)
+              Positioned(
+                top: -20, // Reduced distance
+                child: Icon(
+                  Icons.workspace_premium,
+                  color: AppColors.accentYellow,
+                  size: 30, // Reduced size
+                  shadows: [
+                    Shadow(
+                      offset: const Offset(1, 1),
+                      blurRadius: 3,
+                      color: AppColors.black.withOpacity(0.3),
+                    ),
+                  ],
+                ),
+              ),
+
+            // Position badge
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 22, // Slightly reduced size
+                height: 22, // Slightly reduced size
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: color,
+                  border: Border.all(color: AppColors.white, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    position.toString(),
+                    style: const TextStyle(
+                      color: AppColors.lightText,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12, // Reduced font size
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        // Player name
+        Container(
+          margin: const EdgeInsets.only(top: 6, bottom: 3), // Reduced margins
+          width: width,
+          child: Text(
+            player['displayName'] ?? 'Unknown',
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: AppColors.lightText,
+              fontWeight: FontWeight.bold,
+              fontSize: position == 1 ? 14 : 12, // Reduced font size
+            ),
+          ),
+        ),
+
+        // Score
+        Container(
+          margin: const EdgeInsets.only(bottom: 6), // Reduced margin
+          padding: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 2,
+          ), // Reduced padding
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withOpacity(0.5), width: 1),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.star,
+                color: AppColors.accentYellow,
+                size: 12, // Reduced size
+              ),
+              const SizedBox(width: 2), // Reduced spacing
+              Text(
+                '${player['score'] ?? 0}',
+                style: const TextStyle(
+                  color: AppColors.lightText,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12, // Reduced font size
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Podium stand
+        Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [color, color.withOpacity(0.7)],
+            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Center(
+            child:
+                position == 1
+                    ? const Text(
+                      "١",
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 44, // Reduced font size
                       ),
+                    )
+                    : position == 2
+                    ? const Text(
+                      "٢",
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 36, // Reduced font size
+                      ),
+                    )
+                    : const Text(
+                      "٣",
+                      style: TextStyle(
+                        color: AppColors.lightText,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 36, // Reduced font size
+                      ),
+                    ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlayerListItem(Map<String, dynamic> player, int index) {
+    // Skip the top 3 players as they are already shown in the podium
+    if (index < 3) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.surface2.withOpacity(0.8),
+            AppColors.surface1.withOpacity(0.9),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withOpacity(0.2),
+            offset: const Offset(0, 2),
+            blurRadius: 4,
+          ),
+        ],
+        border: Border.all(color: AppColors.border2, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Row(
+          children: [
+            // Rank number
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.primaryRed.withOpacity(0.7),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  '${index + 1}',
+                  style: const TextStyle(
+                    color: AppColors.lightText,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              winner['displayName'] ?? 'Unknown',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+
+            const SizedBox(width: 12),
+
+            // Player avatar
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.black.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: AppColors.primaryTeal.withOpacity(0.5),
+                child:
+                    player['photoUrl'] != null &&
+                            player['photoUrl'].toString().isNotEmpty
+                        ? ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: player['photoUrl'],
+                            placeholder:
+                                (context, url) =>
+                                    const CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.white,
+                                    ),
+                            errorWidget:
+                                (context, url, error) => const Icon(
+                                  Icons.person,
+                                  color: AppColors.white,
+                                  size: 20,
+                                ),
+                            fit: BoxFit.cover,
+                            width: 40,
+                            height: 40,
+                          ),
+                        )
+                        : const Icon(
+                          Icons.person,
+                          color: AppColors.white,
+                          size: 20,
+                        ),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              widget.gameId == null && winner['gamesWon'] != null
-                  ? '${winner['gamesWon']} یاری براوە | ${winner['totalScore']} خاڵ'
-                  : '${winner['score']} خاڵ',
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+
+            const SizedBox(width: 16),
+
+            // Player name and stats
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    player['displayName'] ?? 'Unknown',
+                    style: const TextStyle(
+                      color: AppColors.lightText,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (widget.gameId == null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.emoji_events_outlined,
+                            color: AppColors.accentYellow,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${player['gamesWon'] ?? 0} یاری براوە',
+                            style: TextStyle(
+                              color: AppColors.mediumText,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // Score
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryRed.withOpacity(0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.star,
+                    color: AppColors.accentYellow,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${player['score'] ?? 0}',
+                    style: const TextStyle(
+                      color: AppColors.lightText,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
