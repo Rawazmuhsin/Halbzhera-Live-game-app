@@ -1,6 +1,8 @@
 // File: lib/screens/admin/section_questions_screen.dart
 // Description: Screen to view all questions in a game section
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:halbzhera/widgets/admin/question_item_card.dart';

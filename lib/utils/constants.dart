@@ -1,6 +1,8 @@
 // File: lib/utils/constants.dart
 // Description: All app constants, colors, dimensions, and text strings
 
+// ignore_for_file: use_full_hex_values_for_flutter_colors
+
 import 'package:flutter/material.dart';
 
 // ============================================================================

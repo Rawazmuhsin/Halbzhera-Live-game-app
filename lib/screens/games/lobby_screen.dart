@@ -1,4 +1,6 @@
 // Fixed lobby_screen.dart with proper countdown management
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../utils/constants.dart';

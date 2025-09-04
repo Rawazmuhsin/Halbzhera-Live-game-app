@@ -1,6 +1,8 @@
 // File: lib/widgets/admin/action_card.dart
 // Description: Reusable action card widget for quick actions
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

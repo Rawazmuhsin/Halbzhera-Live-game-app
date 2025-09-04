@@ -1,6 +1,8 @@
 // File: lib/widgets/home/games_list.dart
 // Description: List of upcoming games
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';

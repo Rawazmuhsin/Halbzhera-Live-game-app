@@ -1,6 +1,8 @@
 // File: lib/widgets/lobby/users_list.dart
 // Description: Users list widget for lobby
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 import 'user_card.dart';

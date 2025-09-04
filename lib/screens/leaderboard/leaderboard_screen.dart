@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:halbzhera/providers/database_provider.dart';

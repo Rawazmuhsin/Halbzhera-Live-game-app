@@ -1,6 +1,8 @@
 // File: lib/screens/auth/login_screen.dart
 // Description: Updated login screen using the new design system
 
+// ignore_for_file: avoid_print, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';

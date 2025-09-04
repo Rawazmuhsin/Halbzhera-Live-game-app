@@ -1,6 +1,8 @@
 // File: lib/screens/home/home.dart
 // Description: Enhanced home screen with automatic lobby navigation using streams
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 import '../../widgets/common/gradient_background.dart';
@@ -226,4 +228,3 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 }
-

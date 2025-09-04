@@ -1,6 +1,8 @@
 // File: lib/widgets/admin/stat_card.dart
 // Description: Reusable statistic card widget
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

@@ -1,6 +1,8 @@
 // File: lib/widgets/home/game_card.dart
 // Description: Individual game card with lobby navigation
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';

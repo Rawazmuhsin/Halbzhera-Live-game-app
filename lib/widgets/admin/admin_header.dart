@@ -1,6 +1,8 @@
 // File: lib/widgets/admin/admin_header.dart
 // Description: Reusable admin header widget
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

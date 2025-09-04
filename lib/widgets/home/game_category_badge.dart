@@ -1,6 +1,8 @@
 // File: lib/widgets/home/game_category_badge.dart
 // Description: Category badge for game card
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

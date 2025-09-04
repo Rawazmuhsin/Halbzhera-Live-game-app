@@ -1,6 +1,8 @@
 // File: lib/config/firebase_config.dart
 // Description: Updated Firebase configuration with live game collections
 
+// ignore_for_file: avoid_print
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

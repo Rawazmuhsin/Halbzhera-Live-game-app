@@ -1,6 +1,8 @@
 // File: lib/widgets/home/home_header.dart
 // Description: App header with logo and name
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';

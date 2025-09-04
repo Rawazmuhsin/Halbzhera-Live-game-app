@@ -1,6 +1,8 @@
 // File: lib/services/database_service.dart
 // Description: Updated Firestore database service with live game functionality
 
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../config/firebase_config.dart';
 import '../models/user_model.dart';

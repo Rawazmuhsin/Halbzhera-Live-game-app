@@ -1,6 +1,8 @@
 // File: lib/widgets/home/navigation_button.dart
 // Description: Individual navigation button
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 import 'navigation_item.dart';

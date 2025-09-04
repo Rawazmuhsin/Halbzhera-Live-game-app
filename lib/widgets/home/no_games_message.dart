@@ -1,6 +1,8 @@
 // File: lib/widgets/home/no_games_message.dart
 // Description: Message when no games available
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

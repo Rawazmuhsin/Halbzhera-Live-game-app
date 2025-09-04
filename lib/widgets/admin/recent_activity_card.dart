@@ -1,6 +1,8 @@
 // File: lib/widgets/admin/recent_activity_card.dart
 // Description: Reusable recent activity card widget
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

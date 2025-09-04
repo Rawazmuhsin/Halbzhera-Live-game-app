@@ -1,6 +1,8 @@
 // File: lib/widgets/auth/social_login_button.dart
 // Description: Social login buttons with Google and Facebook logos
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

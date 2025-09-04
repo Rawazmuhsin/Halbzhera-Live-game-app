@@ -1,6 +1,8 @@
 // File: lib/providers/quiz_provider.dart
 // Description: Updated Quiz state management with live game integration
 
+// ignore_for_file: avoid_print
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/category_model.dart';

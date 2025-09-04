@@ -1,6 +1,8 @@
 // File: lib/providers/auth_provider.dart
 // Description: Updated authentication state management with live game integration
 
+// ignore_for_file: avoid_print
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';

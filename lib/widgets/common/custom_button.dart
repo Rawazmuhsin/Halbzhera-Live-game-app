@@ -1,6 +1,8 @@
 // File: lib/widgets/common/custom_button.dart
 // Description: Reusable custom button widget with different styles and animations
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

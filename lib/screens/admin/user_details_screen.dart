@@ -1,6 +1,8 @@
 // File: lib/screens/admin/user_details_screen.dart
 // Description: Screen to view detailed user information
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/user_model.dart';

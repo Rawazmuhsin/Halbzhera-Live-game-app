@@ -1,6 +1,8 @@
 // File: lib/providers/auto_navigation_provider.dart
 // Description: Provider for automatic navigation to lobby when game starts
 
+// ignore_for_file: avoid_print
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/scheduled_game_model.dart';

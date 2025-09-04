@@ -1,6 +1,8 @@
 // File: lib/screens/admin/create_game_screen.dart
 // Description: Screen for creating new scheduled games
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';

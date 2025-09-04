@@ -1,6 +1,8 @@
 // File: lib/widgets/lobby/lobby_header.dart
 // Description: Lobby screen header with game info and leave button
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 import '../../models/scheduled_game_model.dart';

@@ -1,6 +1,8 @@
 // File: lib/widgets/home/navigation_grid.dart
 // Description: 4-button navigation grid
 
+// ignore_for_file: deprecated_member_use, avoid_print
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 import '../../config/app_routes.dart';
@@ -72,7 +74,6 @@ class _NavigationGridState extends State<NavigationGrid> {
         Navigator.of(context).pushNamed('/leaderboard');
         break;
       case 'settings':
-        // TODO: Implement settings navigation
         break;
       case 'about':
         Navigator.of(context).pushNamed(AppRoutes.about);

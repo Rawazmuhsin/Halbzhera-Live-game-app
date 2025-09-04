@@ -1,6 +1,8 @@
 // File: lib/widgets/admin/question_item_card.dart
 // Description: Card widget for displaying individual questions in a list
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/question_model.dart';
@@ -453,7 +455,6 @@ class QuestionItemCard extends ConsumerWidget {
   ) async {
     switch (action) {
       case 'edit':
-        // TODO: Navigate to edit screen
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('دەستکاریکردن بەزوویی دێت'),

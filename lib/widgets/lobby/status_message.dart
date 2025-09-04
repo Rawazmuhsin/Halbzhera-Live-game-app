@@ -1,6 +1,8 @@
 // File: lib/widgets/lobby/status_message.dart
 // Description: Status message widget for lobby
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 

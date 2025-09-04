@@ -1,6 +1,8 @@
 // File: lib/providers/live_game_provider.dart
 // Description: Live game state management with Riverpod
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';

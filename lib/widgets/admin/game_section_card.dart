@@ -1,6 +1,8 @@
 // File: lib/widgets/admin/game_section_card.dart
 // Description: Card widget for displaying game section with question status
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';

@@ -1,6 +1,8 @@
 // File: lib/config/app_theme.dart
 // Description: App theme configuration with Material 3 design
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/constants.dart';

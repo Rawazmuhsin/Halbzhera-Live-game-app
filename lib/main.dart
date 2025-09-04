@@ -1,6 +1,8 @@
 // File: lib/main.dart
 // Description: Main entry point with Riverpod and Firebase initialization
 
+// ignore_for_file: deprecated_member_use, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,6 +1,8 @@
 // File: lib/screens/about/about_screen.dart
 // Description: About page for Halbzhera app with information about the game and managers
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
 import '../../widgets/common/gradient_background.dart';

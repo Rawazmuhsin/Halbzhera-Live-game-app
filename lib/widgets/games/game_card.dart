@@ -1,6 +1,8 @@
 // File: lib/widgets/games/game_card.dart
 // Description: Card widget for displaying game sections in the main app
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/scheduled_game_model.dart';

@@ -1,7 +1,7 @@
 // File: lib/screens/game/question_screen.dart
 // Description: The main screen for displaying and interacting with live game questions.
 
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, avoid_print
 
 import 'dart:async';
 import 'package:flutter/material.dart';

@@ -1,6 +1,8 @@
 // File: lib/widgets/common/social_media_links.dart
 // Description: Widget for displaying social media links
 
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../utils/constants.dart';

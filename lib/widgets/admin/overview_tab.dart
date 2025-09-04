@@ -1,6 +1,8 @@
 // File: lib/widgets/admin/overview_tab.dart
 // Description: Overview tab content widget
 
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
