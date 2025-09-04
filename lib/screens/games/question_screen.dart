@@ -264,8 +264,11 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
     final userId = ref.read(authStateProvider).value?.uid;
     if (userId == null) return;
 
-    // Calculate score based on number of questions completed
-    final score = _allQuestions.length * 100;
+    // Calculate score based on number of questions completed plus a bonus for winning
+    // Each correct question = 100 points + 300 bonus points for winning
+    final questionPoints = _allQuestions.length * 100;
+    final winnerBonus = 300;
+    final score = questionPoints + winnerBonus;
 
     // Save game result with user as winner
     ref

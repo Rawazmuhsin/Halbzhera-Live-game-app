@@ -1,6 +1,8 @@
 // File: lib/providers/theme_provider.dart
 // Description: Theme and preferences state management with Riverpod
 
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
