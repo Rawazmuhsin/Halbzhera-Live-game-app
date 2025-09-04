@@ -53,6 +53,9 @@ dependencies:
   
   # Image Handling
   cached_network_image: ^3.4.1
+  
+  # URL Launcher for opening links
+  url_launcher: ^6.2.2
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +82,8 @@ flutter:
     - assets/sounds/
     - assets/fonts/
     - assets/icons/
+    - assets/managerimage/
+    - assets/social/
     - assets/applogo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
