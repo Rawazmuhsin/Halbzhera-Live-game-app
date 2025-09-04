@@ -13,7 +13,8 @@ class AboutScreen extends StatefulWidget {
   State<AboutScreen> createState() => _AboutScreenState();
 }
 
-class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStateMixin {
+class _AboutScreenState extends State<AboutScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -40,10 +41,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
-                  children: [
-                    _buildAboutGameTab(),
-                    _buildAboutManagersTab(),
-                  ],
+                  children: [_buildAboutGameTab(), _buildAboutManagersTab()],
                 ),
               ),
             ],
@@ -65,9 +63,9 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
           const SizedBox(width: AppDimensions.paddingS),
           Text(
             'دەربارەی ئێمە',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.lightText,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: AppColors.lightText),
           ),
         ],
       ),
@@ -110,9 +108,9 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
               children: [
                 Text(
                   'هەڵبژێرە یارییەکی زیندووە کە بە شێوەیەکی ڕاستەوخۆ لە کاتی دیاریکراودا بەڕێوە دەچێت. بەشداربووان دەتوانن خۆیان تۆمار بکەن و بەشداری یارییەکان بکەن بۆ وەرگرتنی خەڵات و خاڵ.',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.lightText,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
                 ),
                 const SizedBox(height: AppDimensions.paddingM),
                 Image.asset(
@@ -132,27 +130,33 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
               children: [
                 Text(
                   'بەشداربووان لە هەر یاریەکدا خاڵ کۆدەکەنەوە بەپێی:',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.lightText,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
                 ),
                 const SizedBox(height: AppDimensions.paddingS),
                 _buildPointItem('وەڵامی ڕاست', '10 خاڵ بۆ هەر پرسیارێک'),
-                _buildPointItem('خێرایی وەڵامدانەوە', 'تا خێراتر بیت، خاڵی زیاتر وەردەگریت'),
-                _buildPointItem('بەشداریکردنی بەردەوام', 'خاڵی تایبەت بۆ ئەوانەی کە بەردەوامن'),
+                _buildPointItem(
+                  'خێرایی وەڵامدانەوە',
+                  'تا خێراتر بیت، خاڵی زیاتر وەردەگریت',
+                ),
+                _buildPointItem(
+                  'بەشداریکردنی بەردەوام',
+                  'خاڵی تایبەت بۆ ئەوانەی کە بەردەوامن',
+                ),
                 const SizedBox(height: AppDimensions.paddingM),
                 Text(
                   'خەڵاتەکان:',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.lightText,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(color: AppColors.lightText),
                 ),
                 const SizedBox(height: AppDimensions.paddingS),
                 Text(
                   'بەشداربووانی سەرکەوتوو خەڵاتی نەختینە و دیاری تایبەت وەردەگرن کە لە کۆتایی هەر یارییەک ڕادەگەیەنرێن.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.lightText,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.lightText),
                 ),
               ],
             ),
@@ -194,9 +198,9 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
               children: [
                 Text(
                   'یارییەکانی هەڵبژێرە لەلایەن تیمێکی پسپۆڕەوە بەڕێوە دەبرێن:',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.lightText,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
                 ),
                 const SizedBox(height: AppDimensions.paddingM),
                 _buildManagementItem(
@@ -232,52 +236,59 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
               children: [
                 Text(
                   'یارییەکانی هەڵبژێرە لەلایەن ئەم تیمەوە بەڕێوە دەبرێن و گەشە پێدەدرێن:',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.lightText,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
                 ),
               ],
             ),
           ),
           const SizedBox(height: AppDimensions.paddingL),
-          
+
           // Developer Profile
           _buildManagerProfileCard(
             name: 'رەوەز محسین',
             role: 'گەشەپێدەری ئەپ',
             imagePath: 'assets/managerimage/developer.jpg',
-            description: 'بەرپرسی دیزاینکردن و گەشەپێدانی ئەپەکە. کارەکانی بریتین لە:'
+            description:
+                'بەرپرسی دیزاینکردن و گەشەپێدانی ئەپەکە. کارەکانی بریتین لە:'
                 '\n• دیزاینکردن و جێبەجێکردنی پەیکەری ئەپەکە'
                 '\n• جێبەجێکردنی هەموو تایبەتمەندی و فەنکشنەکانی ئەپەکە'
                 '\n• چارەسەرکردنی کێشەکان و باشترکردنی کارایی ئەپەکە'
                 '\n• بەڕێوەبردنی پەیوەندی لەگەڵ سێرڤەرەکان',
             skills: ['Flutter', 'Firebase', 'UI/UX Design', 'API Integration'],
           ),
-          
+
           const SizedBox(height: AppDimensions.paddingL),
-          
+
           // Manager Profile
           _buildManagerProfileCard(
             name: 'یوسف ومید',
             role: 'بەڕێوەبەری یارییەکان',
             imagePath: 'assets/managerimage/manager.jpg',
-            description: 'بەرپرسی بەڕێوەبردن و ڕێکخستنی یارییەکان. کارەکانی بریتین لە:'
+            description:
+                'بەرپرسی بەڕێوەبردن و ڕێکخستنی یارییەکان. کارەکانی بریتین لە:'
                 '\n• ڕێکخستنی یارییەکان و دیاریکردنی کاتەکان'
                 '\n• دانانی پرسیارەکان و دڵنیابوون لە دروستی و جۆراوجۆرییان'
                 '\n• بەڕێوەبردنی بەشداربووان و چارەسەرکردنی کێشەکانیان'
                 '\n• دابەشکردنی خەڵاتەکان و ڕێکخستنی پلەبەندی یاریزانەکان',
-            skills: ['Quiz Design', 'Event Management', 'Community Management', 'Content Creation'],
+            skills: [
+              'Quiz Design',
+              'Event Management',
+              'Community Management',
+              'Content Creation',
+            ],
           ),
-          
+
           const SizedBox(height: AppDimensions.paddingL),
-          
-                    // Social Media Links Section
+
+          // Social Media Links Section
           const SocialMediaLinks(),
         ],
       ),
     );
   }
-  
+
   Widget _buildManagerProfileCard({
     required String name,
     required String role,
@@ -318,7 +329,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                     gradient: AppColors.primaryGradient,
                   ),
                 ),
-                
+
                 // Profile info with image
                 Padding(
                   padding: const EdgeInsets.all(AppDimensions.paddingM),
@@ -341,10 +352,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(45),
-                          child: Image.asset(
-                            imagePath,
-                            fit: BoxFit.cover,
-                          ),
+                          child: Image.asset(imagePath, fit: BoxFit.cover),
                         ),
                       ),
                       const SizedBox(width: AppDimensions.paddingM),
@@ -355,26 +363,29 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                           children: [
                             Text(
                               name,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: AppColors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleLarge?.copyWith(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 4),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: AppDimensions.paddingS, 
+                                horizontal: AppDimensions.paddingS,
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+                                borderRadius: BorderRadius.circular(
+                                  AppDimensions.radiusM,
+                                ),
                               ),
                               child: Text(
                                 role,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppColors.white,
-                                    ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(color: AppColors.white),
                               ),
                             ),
                           ],
@@ -386,7 +397,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
               ],
             ),
           ),
-          
+
           // Description
           Padding(
             padding: const EdgeInsets.all(AppDimensions.paddingM),
@@ -396,25 +407,26 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.lightText,
-                        height: 1.5,
-                      ),
+                    color: AppColors.lightText,
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: AppDimensions.paddingM),
-                
+
                 // Skills section
                 Text(
                   'شارەزاییەکان:',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: AppColors.lightText,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: AppColors.lightText,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: AppDimensions.paddingS),
                 Wrap(
                   spacing: AppDimensions.paddingS,
                   runSpacing: AppDimensions.paddingS,
-                  children: skills.map((skill) => _buildSkillChip(skill)).toList(),
+                  children:
+                      skills.map((skill) => _buildSkillChip(skill)).toList(),
                 ),
               ],
             ),
@@ -423,7 +435,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
       ),
     );
   }
-  
+
   Widget _buildSkillChip(String skill) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -437,10 +449,7 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
       ),
       child: Text(
         skill,
-        style: TextStyle(
-          color: AppColors.mediumText,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: AppColors.mediumText, fontSize: 12),
       ),
     );
   }
@@ -468,9 +477,9 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
             child: Text(
               title,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Padding(
@@ -492,16 +501,16 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
           Text(
             title,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.lightText,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: AppColors.lightText,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(width: AppDimensions.paddingS),
           Text(
             '- $points',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.mediumText,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.mediumText),
           ),
         ],
       ),
@@ -539,16 +548,16 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppColors.lightText,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: AppColors.lightText,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.mediumText,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: AppColors.mediumText),
                 ),
               ],
             ),
@@ -566,14 +575,18 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
         children: [
           Row(
             children: [
-              const Icon(Icons.check_circle, color: AppColors.primaryRed, size: 18),
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.primaryRed,
+                size: 18,
+              ),
               const SizedBox(width: AppDimensions.paddingS),
               Text(
                 title,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.lightText,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppColors.lightText,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -582,9 +595,9 @@ class _AboutScreenState extends State<AboutScreen> with SingleTickerProviderStat
             padding: const EdgeInsets.only(left: AppDimensions.paddingL),
             child: Text(
               description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.mediumText,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.mediumText),
             ),
           ),
         ],
