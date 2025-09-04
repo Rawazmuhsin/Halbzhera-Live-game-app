@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import '../../config/app_routes.dart';
 import 'navigation_button.dart';
 import 'navigation_item.dart';
 
@@ -74,7 +75,7 @@ class _NavigationGridState extends State<NavigationGrid> {
         // TODO: Implement settings navigation
         break;
       case 'about':
-        // TODO: Implement about navigation
+        Navigator.of(context).pushNamed(AppRoutes.about);
         break;
       case 'home':
       default:
