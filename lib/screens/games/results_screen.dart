@@ -286,7 +286,8 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               // Back to games button
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  // Navigate to home screen instead of just popping
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2DCCDB),
@@ -299,7 +300,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                   ),
                 ),
                 child: const Text(
-                  'گەڕانەوە بۆ یارییەکان',
+                  'گەڕانەوە بۆ سەرەتا',
                   style: TextStyle(fontSize: 16),
                 ),
               ),
