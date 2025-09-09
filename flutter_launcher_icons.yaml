@@ -1,0 +1,17 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/applogo.png"
+  adaptive_icon_background: "#2DCCDB" # Use your app's primary color
+  adaptive_icon_foreground: "assets/applogo.png"
+  min_sdk_android: 21 # Android 5.0
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false
+  remove_alpha_ios: true # Remove transparency for iOS icons
+  # Notification icon configuration
+  android_notification_icon:
+    default: "@drawable/ic_stat_notification"
