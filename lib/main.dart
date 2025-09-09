@@ -12,6 +12,7 @@ import 'config/app_routes.dart';
 import 'screens/auth/auth_gate.dart';
 import 'utils/constants.dart';
 import 'utils/debug_helper.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,12 +39,26 @@ void main() async {
     await FirebaseConfig.initialize();
     print('✅ Firebase initialized successfully!');
 
+    // Initialize notifications
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+    print('✅ Notifications initialized successfully!');
+
+    // Check notification permissions
+    final notificationsAllowed =
+        await notificationService.areNotificationsAllowed();
+    print('✅ Notifications allowed: $notificationsAllowed');
+
+    // Send test notifications to verify the system works
+    await notificationService.sendTestNotification();
+    print('✅ Test notifications sent');
+
     // Add debug information
     DebugHelper.logGoogleSignInConfiguration();
     DebugHelper.logFirebaseConfiguration();
     await DebugHelper.testGoogleSignInAvailability();
   } catch (e) {
-    print('❌ Error initializing Firebase: $e');
+    print('❌ Error initializing Firebase or notifications: $e');
     DebugHelper.printTroubleshootingGuide();
   }
 
