@@ -4,6 +4,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/scheduled_game_model.dart';
 import '../services/database_service.dart';
+import '../services/game_notification_manager.dart';
 import 'auth_provider.dart';
 
 // Scheduled games stream provider
@@ -37,8 +38,9 @@ final scheduledGameProvider =
 // Scheduled game notifier for CRUD operations
 class ScheduledGameNotifier extends StateNotifier<AsyncValue<void>> {
   final DatabaseService _databaseService;
+  final Ref _ref;
 
-  ScheduledGameNotifier(this._databaseService)
+  ScheduledGameNotifier(this._databaseService, this._ref)
     : super(const AsyncValue.data(null));
 
   // Create new scheduled game
@@ -47,6 +49,18 @@ class ScheduledGameNotifier extends StateNotifier<AsyncValue<void>> {
 
     try {
       final gameId = await _databaseService.createScheduledGame(game);
+
+      // Schedule notifications for the game
+      try {
+        final notificationManager = _ref.read(gameNotificationManagerProvider);
+        final gameWithId = game.copyWith(id: gameId);
+        await notificationManager.notifyNewGame(gameWithId);
+        await notificationManager.scheduleGameReminder(gameWithId);
+      } catch (notificationError) {
+        print('Failed to schedule notifications: $notificationError');
+        // Continue anyway, don't fail the game creation
+      }
+
       state = const AsyncValue.data(null);
       return gameId;
     } catch (e, stackTrace) {
@@ -61,6 +75,18 @@ class ScheduledGameNotifier extends StateNotifier<AsyncValue<void>> {
 
     try {
       await _databaseService.updateScheduledGame(game);
+
+      // Reschedule notifications for the updated game
+      try {
+        final notificationManager = _ref.read(gameNotificationManagerProvider);
+        // Also notify that the game has been updated
+        await notificationManager.notifyNewGame(game);
+        await notificationManager.scheduleGameReminder(game);
+      } catch (notificationError) {
+        print('Failed to reschedule notifications: $notificationError');
+        // Continue anyway, don't fail the game update
+      }
+
       state = const AsyncValue.data(null);
       return true;
     } catch (e, stackTrace) {
@@ -123,7 +149,7 @@ class ScheduledGameNotifier extends StateNotifier<AsyncValue<void>> {
 final scheduledGameNotifierProvider =
     StateNotifierProvider<ScheduledGameNotifier, AsyncValue<void>>((ref) {
       final databaseService = ref.read(databaseServiceProvider);
-      return ScheduledGameNotifier(databaseService);
+      return ScheduledGameNotifier(databaseService, ref);
     });
 
 // Games ready to start provider

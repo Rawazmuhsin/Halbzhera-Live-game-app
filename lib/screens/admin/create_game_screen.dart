@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 import '../../utils/constants.dart';
 import '../../models/scheduled_game_model.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/scheduled_game_provider.dart';
+import '../../providers/database_provider.dart';
 import '../../widgets/common/gradient_background.dart';
 
 class CreateGameScreen extends ConsumerStatefulWidget {
@@ -710,15 +712,18 @@ class _CreateGameScreenState extends ConsumerState<CreateGameScreen> {
         },
       );
 
-      final databaseService = ref.read(databaseServiceProvider);
+      final gameNotifier = ref.read(scheduledGameNotifierProvider.notifier);
 
+      // Either update or create the game
+      bool success = false;
       if (widget.gameToEdit != null) {
-        await databaseService.updateScheduledGame(game);
+        success = await gameNotifier.updateGame(game);
       } else {
-        await databaseService.createScheduledGame(game);
+        final gameId = await gameNotifier.createGame(game);
+        success = gameId != null;
       }
 
-      if (mounted) {
+      if (mounted && success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
