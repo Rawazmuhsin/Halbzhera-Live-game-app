@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:halbzhera/providers/auth_provider.dart';
+import 'package:halbzhera/screens/admin/send_notification_screen.dart';
 import 'package:halbzhera/screens/admin/winners_screen.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -103,6 +104,22 @@ class AdminDashboardScreen extends ConsumerWidget {
                       Colors.purple,
                       () {
                         // Navigate to reports
+                      },
+                    ),
+                    _buildAdminTile(
+                      context,
+                      'ناردنی ئاگاداری',
+                      'ناردنی ئاگاداری بۆ بەکارهێنەران',
+                      Icons.notification_add,
+                      Colors.orange,
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => const SendNotificationScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

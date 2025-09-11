@@ -13,6 +13,8 @@ import 'screens/auth/auth_gate.dart';
 import 'utils/constants.dart';
 import 'utils/debug_helper.dart';
 import 'services/notification_service.dart';
+import 'services/broadcast_notification_service.dart';
+import 'services/functions_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +45,15 @@ void main() async {
     final notificationService = NotificationService();
     await notificationService.initialize();
     print('✅ Notifications initialized successfully!');
+
+    // Initialize Firebase Functions
+    try {
+      await FunctionsService.initialize();
+      print('✅ Firebase Functions initialized successfully!');
+    } catch (e) {
+      print('❌ Error initializing Firebase Functions: $e');
+      // Continue anyway, we'll try again when needed
+    }
 
     // Check notification permissions
     final notificationsAllowed =
