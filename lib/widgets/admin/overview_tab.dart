@@ -10,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/live_game_provider.dart';
 import '../../screens/admin/create_game_screen.dart';
 import '../../screens/admin/add_questions_screen.dart';
+import '../../screens/admin/send_notification_screen.dart';
 import '../../widgets/common/loading_widget.dart';
 import 'stat_card.dart';
 import 'action_card.dart';
@@ -163,6 +164,12 @@ class OverviewTab extends ConsumerWidget {
                   onTap: () => _navigateToAddQuestions(context),
                 ),
                 ActionCard(
+                  title: 'ناردنی ئاگاداری',
+                  icon: Icons.notifications_active,
+                  color: Colors.orange,
+                  onTap: () => _navigateToSendNotification(context),
+                ),
+                ActionCard(
                   title: 'یاری زیندوو ببینە',
                   icon: Icons.live_tv,
                   color: AppColors.success,
@@ -279,6 +286,13 @@ class OverviewTab extends ConsumerWidget {
   void _navigateToLiveMonitor(BuildContext context) {
     // Navigate to live game monitor
     print('Navigate to live monitor');
+  }
+
+  void _navigateToSendNotification(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SendNotificationScreen()),
+    );
   }
 
   void _navigateToFullActivity() {

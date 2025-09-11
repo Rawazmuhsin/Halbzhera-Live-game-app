@@ -23,6 +23,10 @@ class NotificationService {
       tz_data.initializeTimeZones();
       debugPrint('🔔 Timezone initialized.');
 
+      // Subscribe to the 'all' topic to receive global notifications
+      await subscribeToTopic('all');
+      debugPrint('🔔 Subscribed to "all" topic for global notifications.');
+
       // Initialize platform specific settings
       const AndroidInitializationSettings androidInitializationSettings =
           AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -222,6 +226,30 @@ class NotificationService {
               showBadge: true,
             );
 
+        const AndroidNotificationChannel customChannel =
+            AndroidNotificationChannel(
+              'custom_channel',
+              'Custom Notifications',
+              description: 'Custom notifications from admin',
+              importance: Importance.high,
+              sound: RawResourceAndroidNotificationSound('correct'),
+              enableVibration: true,
+              playSound: true,
+              showBadge: true,
+            );
+
+        const AndroidNotificationChannel broadcastChannel =
+            AndroidNotificationChannel(
+              'broadcast_channel',
+              'Broadcast Notifications',
+              description: 'Broadcast notifications sent to all users',
+              importance: Importance.high,
+              sound: RawResourceAndroidNotificationSound('correct'),
+              enableVibration: true,
+              playSound: true,
+              showBadge: true,
+            );
+
         final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
             _flutterLocalNotificationsPlugin
                 .resolvePlatformSpecificImplementation<
@@ -232,6 +260,8 @@ class NotificationService {
         await androidPlugin?.createNotificationChannel(remindersChannel);
         await androidPlugin?.createNotificationChannel(winnersChannel);
         await androidPlugin?.createNotificationChannel(testChannel);
+        await androidPlugin?.createNotificationChannel(customChannel);
+        await androidPlugin?.createNotificationChannel(broadcastChannel);
 
         debugPrint('✅ Android notification channels created successfully!');
       } catch (e) {
@@ -526,6 +556,133 @@ class NotificationService {
     } catch (e) {
       debugPrint('❌ Error checking notification permissions: $e');
       return false;
+    }
+  }
+
+  // Send custom notification for admin broadcasts
+  Future<void> sendCustomNotification({
+    required String title,
+    required String body,
+    String? payload,
+    String channelId = 'custom_channel',
+  }) async {
+    debugPrint('🔔 Sending custom notification: $title');
+
+    try {
+      // Generate a unique ID based on current time
+      final notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      await _flutterLocalNotificationsPlugin.show(
+        notificationId,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelId == 'games_channel'
+                ? 'Game Notifications'
+                : channelId == 'games_reminder_channel'
+                ? 'Game Reminders'
+                : channelId == 'winners_channel'
+                ? 'Winner Announcements'
+                : channelId == 'custom_channel'
+                ? 'Custom Notifications'
+                : channelId == 'broadcast_channel'
+                ? 'Broadcast Notifications'
+                : 'Custom Notifications',
+            channelDescription:
+                channelId == 'broadcast_channel'
+                    ? 'Broadcast notifications sent to all users'
+                    : 'Custom notifications from admin',
+            importance: Importance.high,
+            priority: Priority.high,
+            color:
+                channelId == 'broadcast_channel' ? Colors.orange : Colors.blue,
+            icon: '@mipmap/ic_launcher',
+            sound: RawResourceAndroidNotificationSound('correct'),
+            playSound: true,
+            enableVibration: true,
+            visibility: NotificationVisibility.public,
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+            sound: 'correct.mp3',
+            interruptionLevel: InterruptionLevel.timeSensitive,
+          ),
+        ),
+        payload: payload ?? 'custom_notification',
+      );
+
+      debugPrint('✅ Custom notification sent successfully!');
+    } catch (e) {
+      debugPrint('❌ Error sending custom notification: $e');
+    }
+  }
+
+  // Schedule custom notification for later
+  Future<void> scheduleCustomNotification({
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+    String? payload,
+    String channelId = 'custom_channel',
+  }) async {
+    debugPrint(
+      '🔔 Scheduling custom notification: $title for ${scheduledTime.toString()}',
+    );
+
+    try {
+      // Generate a unique ID based on title hash and scheduled time
+      final notificationId =
+          title.hashCode + scheduledTime.millisecondsSinceEpoch ~/ 1000;
+
+      // Only schedule if in the future
+      if (scheduledTime.isAfter(DateTime.now())) {
+        await _flutterLocalNotificationsPlugin.zonedSchedule(
+          notificationId,
+          title,
+          body,
+          tz.TZDateTime.from(scheduledTime, tz.local),
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              channelId,
+              channelId == 'custom_channel'
+                  ? 'Custom Notifications'
+                  : 'Scheduled Notifications',
+              channelDescription: 'Scheduled custom notifications from admin',
+              importance: Importance.high,
+              priority: Priority.high,
+              color: Colors.purple,
+              icon: '@mipmap/ic_launcher',
+              sound: RawResourceAndroidNotificationSound('correct'),
+              playSound: true,
+              enableVibration: true,
+              visibility: NotificationVisibility.public,
+            ),
+            iOS: const DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+              sound: 'correct.mp3',
+              interruptionLevel: InterruptionLevel.timeSensitive,
+            ),
+          ),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: payload ?? 'scheduled_custom_notification',
+        );
+
+        debugPrint('✅ Custom notification scheduled successfully!');
+      } else {
+        debugPrint(
+          '⚠️ Scheduled time is in the past, not scheduling notification.',
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Error scheduling custom notification: $e');
     }
   }
 
