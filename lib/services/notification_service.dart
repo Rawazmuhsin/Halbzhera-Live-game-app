@@ -599,7 +599,6 @@ class NotificationService {
             color:
                 channelId == 'broadcast_channel' ? Colors.orange : Colors.blue,
             icon: '@mipmap/ic_launcher',
-            sound: RawResourceAndroidNotificationSound('correct'),
             playSound: true,
             enableVibration: true,
             visibility: NotificationVisibility.public,
@@ -608,7 +607,6 @@ class NotificationService {
             presentAlert: true,
             presentBadge: true,
             presentSound: true,
-            sound: 'correct.mp3',
             interruptionLevel: InterruptionLevel.timeSensitive,
           ),
         ),

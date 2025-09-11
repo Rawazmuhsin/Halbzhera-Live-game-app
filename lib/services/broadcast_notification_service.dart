@@ -50,27 +50,37 @@ class BroadcastNotificationService {
 
     _broadcastSubscription?.cancel(); // Cancel any existing subscription
 
-    _broadcastSubscription = _firestore
-        .collection('broadcast_notifications')
-        .where('isActive', isEqualTo: true)
-        .orderBy('createdAt', descending: true)
-        .limit(10) // Get last 10 notifications
-        .snapshots()
-        .listen(
-          _handleBroadcastNotifications,
-          onError: (error) {
-            debugPrint('❌ Error listening for broadcast notifications: $error');
-          },
-        );
+    // Add a small delay to ensure Firebase is fully initialized
+    Future.delayed(Duration(seconds: 2), () {
+      // Start with a simple query that doesn't require an index
+      _broadcastSubscription = _firestore
+          .collection('broadcast_notifications')
+          .where('isActive', isEqualTo: true)
+          .limit(10)
+          .snapshots()
+          .listen(
+            _handleBroadcastNotifications,
+            onError: (error) {
+              debugPrint('❌ Error listening for broadcast notifications: $error');
+              // Retry after 5 seconds
+              Future.delayed(Duration(seconds: 5), () {
+                debugPrint('🔄 Retrying broadcast notification listener...');
+                startListeningForBroadcastNotifications();
+              });
+            },
+          );
+      debugPrint('✅ Broadcast notification listener started');
+    });
   }
 
   /// Handle incoming broadcast notifications
   Future<void> _handleBroadcastNotifications(QuerySnapshot snapshot) async {
-    debugPrint('📡 Received broadcast notifications update');
+    debugPrint('📡 Received broadcast notifications update: ${snapshot.docChanges.length} changes');
 
     // Get the last processed notification ID
     final prefs = await SharedPreferences.getInstance();
     final lastProcessedId = prefs.getString(_lastNotificationIdKey);
+    debugPrint('🔍 Last processed notification ID: $lastProcessedId');
 
     for (var docChange in snapshot.docChanges) {
       if (docChange.type == DocumentChangeType.added) {
@@ -83,7 +93,7 @@ class BroadcastNotificationService {
           continue;
         }
 
-        // Check if this is a new notification (created in the last 5 minutes)
+        // Check if this is a new notification (created in the last 10 minutes)
         final createdAt = data['createdAt'] as int?;
         if (createdAt != null) {
           final notificationTime = DateTime.fromMillisecondsSinceEpoch(
@@ -92,8 +102,8 @@ class BroadcastNotificationService {
           final now = DateTime.now();
           final timeDifference = now.difference(notificationTime);
 
-          // Only show notifications that are less than 5 minutes old
-          if (timeDifference.inMinutes > 5) {
+          // Only show notifications that are less than 10 minutes old
+          if (timeDifference.inMinutes > 10) {
             debugPrint(
               '⏰ Notification too old, skipping: ${timeDifference.inMinutes} minutes old',
             );
@@ -137,15 +147,29 @@ class BroadcastNotificationService {
           await _firestore
               .collection('broadcast_notifications')
               .where('isActive', isEqualTo: true)
-              .orderBy('createdAt', descending: true)
               .limit(limit)
               .get();
 
-      return querySnapshot.docs.map((doc) {
+      // Sort manually after fetching
+      final notifications = querySnapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
         return data;
       }).toList();
+
+      // Sort by timestamp or createdAt
+      notifications.sort((a, b) {
+        final aTime = a['createdAt'] ?? a['timestamp'];
+        final bTime = b['createdAt'] ?? b['timestamp'];
+        if (aTime is Timestamp && bTime is Timestamp) {
+          return bTime.compareTo(aTime);
+        } else if (aTime is int && bTime is int) {
+          return bTime.compareTo(aTime);
+        }
+        return 0;
+      });
+
+      return notifications;
     } catch (e) {
       debugPrint('❌ Error getting recent broadcast notifications: $e');
       return [];
@@ -176,8 +200,8 @@ class BroadcastNotificationService {
           await _firestore
               .collection('broadcast_notifications')
               .where(
-                'createdAt',
-                isLessThan: thirtyDaysAgo.millisecondsSinceEpoch,
+                'timestamp',
+                isLessThan: Timestamp.fromDate(thirtyDaysAgo),
               )
               .get();
 

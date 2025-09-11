@@ -13,6 +13,7 @@ import 'screens/auth/auth_gate.dart';
 import 'utils/constants.dart';
 import 'utils/debug_helper.dart';
 import 'services/notification_service.dart';
+import 'services/broadcast_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,11 @@ void main() async {
     final notificationService = NotificationService();
     await notificationService.initialize();
     print('✅ Notifications initialized successfully!');
+
+    // Initialize broadcast notification service
+    final broadcastNotificationService = BroadcastNotificationService(notificationService);
+    broadcastNotificationService.startListeningForBroadcastNotifications();
+    print('✅ Broadcast notification listener started successfully!');
 
     // Check notification permissions
     final notificationsAllowed =
