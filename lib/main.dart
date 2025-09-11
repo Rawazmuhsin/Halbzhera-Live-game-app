@@ -46,7 +46,9 @@ void main() async {
     print('✅ Notifications initialized successfully!');
 
     // Initialize broadcast notification service
-    final broadcastNotificationService = BroadcastNotificationService(notificationService);
+    final broadcastNotificationService = BroadcastNotificationService(
+      notificationService,
+    );
     broadcastNotificationService.startListeningForBroadcastNotifications();
     print('✅ Broadcast notification listener started successfully!');
 

@@ -61,7 +61,9 @@ class BroadcastNotificationService {
           .listen(
             _handleBroadcastNotifications,
             onError: (error) {
-              debugPrint('❌ Error listening for broadcast notifications: $error');
+              debugPrint(
+                '❌ Error listening for broadcast notifications: $error',
+              );
               // Retry after 5 seconds
               Future.delayed(Duration(seconds: 5), () {
                 debugPrint('🔄 Retrying broadcast notification listener...');
@@ -75,7 +77,9 @@ class BroadcastNotificationService {
 
   /// Handle incoming broadcast notifications
   Future<void> _handleBroadcastNotifications(QuerySnapshot snapshot) async {
-    debugPrint('📡 Received broadcast notifications update: ${snapshot.docChanges.length} changes');
+    debugPrint(
+      '📡 Received broadcast notifications update: ${snapshot.docChanges.length} changes',
+    );
 
     // Get the last processed notification ID
     final prefs = await SharedPreferences.getInstance();
@@ -151,11 +155,12 @@ class BroadcastNotificationService {
               .get();
 
       // Sort manually after fetching
-      final notifications = querySnapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+      final notifications =
+          querySnapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return data;
+          }).toList();
 
       // Sort by timestamp or createdAt
       notifications.sort((a, b) {
@@ -199,10 +204,7 @@ class BroadcastNotificationService {
       final querySnapshot =
           await _firestore
               .collection('broadcast_notifications')
-              .where(
-                'timestamp',
-                isLessThan: Timestamp.fromDate(thirtyDaysAgo),
-              )
+              .where('timestamp', isLessThan: Timestamp.fromDate(thirtyDaysAgo))
               .get();
 
       final batch = _firestore.batch();
