@@ -17,6 +17,7 @@ import '../../providers/auto_navigation_provider.dart';
 import '../../models/scheduled_game_model.dart';
 import '../../screens/games/lobby_screen.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/broadcast_notification_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -35,6 +36,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void initState() {
     super.initState();
     _initializeAnimations();
+
+    // Initialize broadcast notification listener
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(broadcastNotificationListenerProvider);
+    });
   }
 
   void _initializeAnimations() {

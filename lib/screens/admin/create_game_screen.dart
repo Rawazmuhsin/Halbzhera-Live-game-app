@@ -10,7 +10,6 @@ import '../../utils/constants.dart';
 import '../../models/scheduled_game_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/scheduled_game_provider.dart';
-import '../../providers/database_provider.dart';
 import '../../widgets/common/gradient_background.dart';
 
 class CreateGameScreen extends ConsumerStatefulWidget {
