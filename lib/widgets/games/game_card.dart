@@ -16,6 +16,7 @@ class GameCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final questionCountAsync = ref.watch(
       totalQuestionCountProvider(game.categoryName),
     );
@@ -30,12 +31,15 @@ class GameCard extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F3460),
+              color: theme.colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
+              border: Border.all(
+                color: theme.colorScheme.primary.withOpacity(0.3),
+                width: 1,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: theme.shadowColor.withOpacity(0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -50,12 +54,12 @@ class GameCard extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.2),
+                        color: theme.colorScheme.secondary.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.gamepad,
-                        color: Colors.blue,
+                        color: theme.colorScheme.secondary,
                         size: 24,
                       ),
                     ),
@@ -64,20 +68,14 @@ class GameCard extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            game.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text(game.name, style: theme.textTheme.titleLarge),
                           if (game.description.isNotEmpty)
                             Text(
                               game.description,
-                              style: TextStyle(
-                                color: Colors.grey[400],
-                                fontSize: 14,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.7,
+                                ),
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -95,17 +93,22 @@ class GameCard extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color:
                                   count >= 10
-                                      ? Colors.green.withOpacity(0.2)
-                                      : Colors.orange.withOpacity(0.2),
+                                      ? theme.colorScheme.tertiary.withOpacity(
+                                        0.2,
+                                      )
+                                      : theme.colorScheme.error.withOpacity(
+                                        0.2,
+                                      ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               '$count پرسیار',
-                              style: TextStyle(
+                              style: theme.textTheme.labelSmall?.copyWith(
                                 color:
-                                    count >= 10 ? Colors.green : Colors.orange,
+                                    count >= 10
+                                        ? theme.colorScheme.tertiary
+                                        : theme.colorScheme.error,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -113,10 +116,10 @@ class GameCard extends ConsumerWidget {
                           () => SizedBox(
                             width: 20,
                             height: 20,
-                            child: const CircularProgressIndicator(
+                            child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.grey,
+                                theme.colorScheme.secondary,
                               ),
                             ),
                           ),
@@ -127,15 +130,14 @@ class GameCard extends ConsumerWidget {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.2),
+                              color: theme.colorScheme.error.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
+                            child: Text(
                               '0 پرسیار',
-                              style: TextStyle(
-                                color: Colors.red,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.error,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -188,16 +190,19 @@ class GameCard extends ConsumerWidget {
                       ),
                       child: Text(
                         game.statusText,
-                        style: TextStyle(
+                        style: theme.textTheme.labelSmall?.copyWith(
                           color: _getStatusColor(game.status),
                           fontWeight: FontWeight.w500,
-                          fontSize: 12,
                         ),
                       ),
                     ),
                     Text(
                       _formatDateTime(game.scheduledTime),
-                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(
+                          0.6,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -209,23 +214,26 @@ class GameCard extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.blue.withOpacity(0.3),
+                      color: theme.colorScheme.primary.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.touch_app, color: Colors.blue[300], size: 16),
+                      Icon(
+                        Icons.touch_app,
+                        color: theme.colorScheme.primary,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'کلیک بکە بۆ بینینی پرسیارەکان',
-                        style: TextStyle(
-                          color: Colors.blue[300],
-                          fontSize: 12,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -246,42 +254,50 @@ class GameCard extends ConsumerWidget {
     String value,
     Color color,
   ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: 16),
-        const SizedBox(width: 4),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(color: color.withOpacity(0.7), fontSize: 10),
+            Icon(icon, color: color, size: 16),
+            const SizedBox(width: 4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: color.withOpacity(0.7),
+                  ),
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 
   Color _getStatusColor(GameStatus status) {
+    // Since we can't directly access the context here, we'll use fixed colors
+    // that match our theme colors
     switch (status) {
       case GameStatus.scheduled:
-        return Colors.blue;
+        return Colors.blue; // primary
       case GameStatus.live:
-        return Colors.orange;
+        return Colors.orange; // tertiary
       case GameStatus.completed:
-        return Colors.grey;
+        return Colors.grey; // onSurfaceVariant
       case GameStatus.cancelled:
-        return Colors.red;
+        return Colors.red; // error
     }
   }
 

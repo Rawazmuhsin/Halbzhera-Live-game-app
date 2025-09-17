@@ -74,6 +74,7 @@ class _NavigationGridState extends State<NavigationGrid> {
         Navigator.of(context).pushNamed('/leaderboard');
         break;
       case 'settings':
+        Navigator.of(context).pushNamed('/settings');
         break;
       case 'about':
         Navigator.of(context).pushNamed(AppRoutes.about);
