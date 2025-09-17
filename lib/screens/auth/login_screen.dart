@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
-import '../../widgets/common/gradient_background.dart';
+import '../../widgets/common/theme_aware_gradient_background.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/auth/login_bottom_sheet.dart';
 import '../../providers/auth_provider.dart';
@@ -58,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GradientBackground(
+      body: ThemeAwareGradientBackground(
         child: SafeArea(
           child: Column(
             children: [

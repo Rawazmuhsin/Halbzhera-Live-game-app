@@ -1,30 +1,22 @@
 // File: lib/config/app_theme.dart
-// Description: App theme configuration with Material 3 design
+// Description: App theme configuration with Material 3 design - dark mode only
 
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/constants.dart';
+import '../utils/app_theme.dart' as ThemeUtils;
 
 class AppTheme {
+  // Dark theme for the app
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
 
-      // Color Scheme
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryRed,
-        secondary: AppColors.primaryTeal,
-        tertiary: AppColors.accentYellow,
-        surface: AppColors.surface1,
-        error: AppColors.error,
-        onPrimary: AppColors.white,
-        onSecondary: AppColors.white,
-        onSurface: AppColors.lightText,
-        onError: AppColors.white,
-      ),
+      // Color Scheme - using our predefined dark theme color scheme
+      colorScheme: ThemeUtils.AppTheme.darkColorScheme,
 
       // App Bar Theme
       appBarTheme: const AppBarTheme(
@@ -203,7 +195,7 @@ class AppTheme {
       ),
 
       // Text Theme
-      textTheme: _buildTextTheme(),
+      textTheme: _buildDarkTextTheme(),
 
       // Icon Theme
       iconTheme: const IconThemeData(
@@ -228,7 +220,7 @@ class AppTheme {
     );
   }
 
-  static TextTheme _buildTextTheme() {
+  static TextTheme _buildDarkTextTheme() {
     return const TextTheme(
       // Display styles
       displayLarge: TextStyle(

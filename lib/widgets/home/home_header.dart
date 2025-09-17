@@ -68,6 +68,15 @@ class HomeHeader extends ConsumerWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        // Settings button
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed('/settings');
+          },
+          icon: const Icon(Icons.settings, color: AppColors.lightText),
+          tooltip: 'ڕێکخستنەکان',
+        ),
+        // Logout button
         IconButton(
           onPressed: () async {
             try {

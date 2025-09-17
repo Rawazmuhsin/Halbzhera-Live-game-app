@@ -78,14 +78,16 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Create an animated theme switcher
     return MaterialApp(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
 
-      // Theme configuration
+      // Theme configuration - always use dark theme
       theme: AppTheme.darkTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark, // Force dark theme for now
+      themeMode: ThemeMode.dark,
+
       // Use AuthGate as the home screen
       home: const AuthGate(),
 
@@ -98,7 +100,11 @@ class MyApp extends ConsumerWidget {
           data: MediaQuery.of(
             context,
           ).copyWith(textScaler: TextScaler.linear(1.0)),
-          child: child!,
+          child: AnimatedTheme(
+            data: Theme.of(context),
+            duration: const Duration(milliseconds: 300),
+            child: child!,
+          ),
         );
       },
     );

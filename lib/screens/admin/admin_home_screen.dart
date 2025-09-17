@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/common/gradient_background.dart';
+import '../../widgets/common/theme_aware_gradient_background.dart';
 import '../../widgets/admin/admin_header.dart';
 import '../../widgets/admin/admin_tab_bar.dart';
 import '../../widgets/admin/overview_tab.dart';
@@ -64,7 +64,7 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen>
       );
     }
 
-    return GradientBackground(
+    return ThemeAwareGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(

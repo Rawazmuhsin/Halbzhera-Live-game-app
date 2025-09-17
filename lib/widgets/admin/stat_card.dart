@@ -26,17 +26,19 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.paddingM),
         decoration: BoxDecoration(
-          color: AppColors.surface2,
+          color: theme.colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-          border: Border.all(color: AppColors.border1),
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.withOpacity(0.1),
+              color: theme.shadowColor.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -46,18 +48,18 @@ class StatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: AppDimensions.paddingM),
-            _buildValue(),
+            _buildValue(context),
             const SizedBox(height: 4),
-            _buildTitle(),
+            _buildTitle(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -69,25 +71,29 @@ class StatCard extends StatelessWidget {
           ),
           child: Icon(icon, color: color, size: 24),
         ),
-        if (trend != null) _buildTrendBadge(),
+        if (trend != null) _buildTrendBadge(context),
       ],
     );
   }
 
-  Widget _buildTrendBadge() {
+  Widget _buildTrendBadge(BuildContext context) {
+    final theme = Theme.of(context);
     final isPositive = trend!.startsWith('+');
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: (isPositive ? AppColors.success : AppColors.error).withOpacity(
-          0.2,
-        ),
+        color: (isPositive
+                ? theme.colorScheme.tertiary
+                : theme.colorScheme.error)
+            .withOpacity(0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         trend!,
         style: TextStyle(
-          color: isPositive ? AppColors.success : AppColors.error,
+          color:
+              isPositive ? theme.colorScheme.tertiary : theme.colorScheme.error,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -95,15 +101,15 @@ class StatCard extends StatelessWidget {
     );
   }
 
-  Widget _buildValue() {
+  Widget _buildValue(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Flexible(
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(
           value,
-          style: const TextStyle(
-            color: AppColors.lightText,
-            fontSize: 28,
+          style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -111,11 +117,15 @@ class StatCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Flexible(
       child: Text(
         title,
-        style: const TextStyle(color: AppColors.mediumText, fontSize: 14),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

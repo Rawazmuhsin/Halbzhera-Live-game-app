@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/scheduled_game_model.dart';
 import '../../providers/scheduled_game_provider.dart';
 import '../../widgets/games/game_card.dart';
-import '../../widgets/common/gradient_background.dart';
+import '../../widgets/common/theme_aware_gradient_background.dart';
 import '../admin/section_questions_screen.dart';
 
 class GamesScreen extends ConsumerWidget {
@@ -31,7 +31,7 @@ class GamesScreen extends ConsumerWidget {
         ),
         centerTitle: true,
       ),
-      body: GradientBackground(
+      body: ThemeAwareGradientBackground(
         child: SafeArea(
           child: upcomingGamesAsync.when(
             data: (games) {

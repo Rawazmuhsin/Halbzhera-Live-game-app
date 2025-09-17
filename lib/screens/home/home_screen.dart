@@ -5,7 +5,7 @@
 
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
-import '../../widgets/common/gradient_background.dart';
+import '../../widgets/common/theme_aware_gradient_background.dart';
 import '../../widgets/home/home_header.dart';
 import '../../widgets/home/welcome_section.dart';
 import '../../widgets/home/navigation_grid.dart';
@@ -143,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final currentUser = ref.watch(currentUserProvider);
     final userJoinedGames = ref.watch(userJoinedGamesProvider);
 
-    return GradientBackground(
+    return ThemeAwareGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: const HomeHeader(),

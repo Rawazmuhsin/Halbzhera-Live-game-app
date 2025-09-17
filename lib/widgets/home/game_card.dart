@@ -26,15 +26,17 @@ class GameCard extends ConsumerWidget {
     final hasJoinedAsync = ref.watch(hasUserJoinedGameProvider(game.id));
     final isLoading = ref.watch(joinGameLoadingProvider);
 
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(AppDimensions.paddingXL),
       decoration: BoxDecoration(
-        color: AppColors.surface2.withOpacity(0.6),
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.6),
         borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
-        border: Border.all(color: AppColors.border1.withOpacity(0.3)),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.1),
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -113,11 +115,13 @@ class GameCard extends ConsumerWidget {
 
   void _joinGame(BuildContext context, WidgetRef ref) async {
     final currentUser = ref.read(currentUserProvider);
+    final theme = Theme.of(context);
+
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('تکایە سەرەتا چوارچێوەکە بکەرەوە'),
-          backgroundColor: AppColors.error,
+          backgroundColor: theme.colorScheme.error,
         ),
       );
       return;
@@ -141,7 +145,7 @@ class GameCard extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('بە سەرکەوتووی بەشداری یاریی "${game.name}" کرد'),
-            backgroundColor: AppColors.success,
+            backgroundColor: theme.colorScheme.tertiary,
           ),
         );
       }
@@ -150,7 +154,7 @@ class GameCard extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('هەڵە لە بەشداری کردن: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: theme.colorScheme.error,
           ),
         );
       }
@@ -161,6 +165,7 @@ class GameCard extends ConsumerWidget {
     final now = DateTime.now();
     final gameTime = game.scheduledTime;
     final timeDifference = gameTime.difference(now);
+    final theme = Theme.of(context);
 
     // Check if game has started (scheduled time has passed)
     final hasGameStarted = timeDifference.inSeconds <= 0;
@@ -175,11 +180,13 @@ class GameCard extends ConsumerWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor:
                   hasGameStarted
-                      ? AppColors
-                          .primaryRed // Red if game started (active lobby)
-                      : AppColors
-                          .primaryTeal, // Teal if waiting (preview lobby)
-              foregroundColor: AppColors.white,
+                      ? theme
+                          .colorScheme
+                          .error // Red if game started (active lobby)
+                      : theme
+                          .colorScheme
+                          .primary, // Primary color if waiting (preview lobby)
+              foregroundColor: theme.colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(
                 vertical: AppDimensions.paddingM,
               ),
@@ -218,8 +225,8 @@ class GameCard extends ConsumerWidget {
           child: OutlinedButton(
             onPressed: () => _leaveGame(context, ref),
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.error),
-              foregroundColor: AppColors.error,
+              side: BorderSide(color: theme.colorScheme.error),
+              foregroundColor: theme.colorScheme.error,
               padding: const EdgeInsets.symmetric(
                 vertical: AppDimensions.paddingM,
               ),
@@ -265,30 +272,31 @@ class GameCard extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
+        final theme = Theme.of(dialogContext);
+
         return AlertDialog(
-          backgroundColor: AppColors.surface2,
-          title: const Text(
-            'جێهێشتنی یاری',
-            style: TextStyle(color: AppColors.lightText),
-          ),
+          backgroundColor: theme.colorScheme.surface,
+          title: Text('جێهێشتنی یاری', style: theme.textTheme.titleLarge),
           content: Text(
             'دڵنیایت لە جێهێشتنی یاریی "${game.name}"؟',
-            style: const TextStyle(color: AppColors.mediumText),
+            style: theme.textTheme.bodyMedium,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text(
+              child: Text(
                 'پاشگەزبوونەوە',
-                style: TextStyle(color: AppColors.mediumText),
+                style: TextStyle(color: theme.colorScheme.primary),
               ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-              child: const Text(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.error,
+              ),
+              child: Text(
                 'جێهێشتن',
-                style: TextStyle(color: AppColors.white),
+                style: TextStyle(color: theme.colorScheme.onError),
               ),
             ),
           ],
@@ -303,19 +311,21 @@ class GameCard extends ConsumerWidget {
             .leaveGame(game.id);
 
         if (success && context.mounted) {
+          final theme = Theme.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('بە سەرکەوتووی یاریی "${game.name}" جێهێشت'),
-              backgroundColor: AppColors.success,
+              backgroundColor: theme.colorScheme.tertiary,
             ),
           );
         }
       } catch (e) {
         if (context.mounted) {
+          final theme = Theme.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('هەڵە لە جێهێشتنی یاری: $e'),
-              backgroundColor: AppColors.error,
+              backgroundColor: theme.colorScheme.error,
             ),
           );
         }
@@ -329,37 +339,38 @@ class GameCard extends ConsumerWidget {
     return showDialog<String>(
       context: context,
       builder: (BuildContext dialogContext) {
+        final theme = Theme.of(dialogContext);
+
         return AlertDialog(
-          backgroundColor: AppColors.surface2,
-          title: const Text(
-            'ژمارەی هەژمار',
-            style: TextStyle(color: AppColors.lightText),
-          ),
+          backgroundColor: theme.colorScheme.surface,
+          title: Text('ژمارەی هەژمار', style: theme.textTheme.titleLarge),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'تکایە ژمارەی هەژمارت بنووسە:',
-                style: TextStyle(color: AppColors.mediumText),
+                style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
-                style: const TextStyle(color: AppColors.lightText),
+                style: TextStyle(color: theme.colorScheme.onSurface),
                 decoration: InputDecoration(
                   hintText: 'ژمارەی هەژمار',
-                  hintStyle: TextStyle(color: AppColors.mediumText),
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border1),
+                    borderSide: BorderSide(color: theme.colorScheme.outline),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.border1),
+                    borderSide: BorderSide(color: theme.colorScheme.outline),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.primaryRed),
+                    borderSide: BorderSide(color: theme.colorScheme.primary),
                   ),
                 ),
               ),
@@ -368,9 +379,9 @@ class GameCard extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(null),
-              child: const Text(
+              child: Text(
                 'پاشگەزبوونەوە',
-                style: TextStyle(color: AppColors.mediumText),
+                style: TextStyle(color: theme.colorScheme.primary),
               ),
             ),
             ElevatedButton(
@@ -379,11 +390,11 @@ class GameCard extends ConsumerWidget {
                 Navigator.of(dialogContext).pop(accountNumber);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryRed,
+                backgroundColor: theme.colorScheme.primary,
               ),
-              child: const Text(
+              child: Text(
                 'دووپاتکردنەوە',
-                style: TextStyle(color: AppColors.white),
+                style: TextStyle(color: theme.colorScheme.onPrimary),
               ),
             ),
           ],

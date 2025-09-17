@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:halbzhera/providers/database_provider.dart';
 import 'package:halbzhera/widgets/loading_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:halbzhera/utils/constants.dart';
+import 'package:halbzhera/widgets/common/theme_aware_gradient_background.dart';
+import 'package:halbzhera/utils/app_theme.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   final String? gameId;
@@ -50,6 +51,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -58,29 +61,21 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         centerTitle: true,
         title: Text(
           widget.gameId != null ? 'پێشەنگەکانی ئەم یاریە' : 'پێشەنگەکان',
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 24,
-            color: AppColors.lightText,
+            color: theme.colorScheme.onSurface,
             shadows: [
               Shadow(
-                offset: Offset(1.0, 1.0),
+                offset: const Offset(1.0, 1.0),
                 blurRadius: 3.0,
-                color: Color.fromARGB(255, 0, 0, 0),
+                color: Colors.black.withOpacity(0.5),
               ),
             ],
           ),
         ),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: AppColors.backgroundGradient,
-          ),
-        ),
       ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
-        child: _buildLeaderboardTab(),
-      ),
+      body: ThemeAwareGradientBackground(child: _buildLeaderboardTab()),
     );
   }
 
@@ -103,12 +98,13 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 child: Text(
                   'هەڵەیەک ڕوویدا: ${snapshot.error}',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.error),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             print('No leaderboard data available');
+            final theme = Theme.of(context);
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -125,14 +121,14 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                           width: 120,
                           height: 120,
                           decoration: BoxDecoration(
-                            color: AppColors.accentYellow.withOpacity(0.2),
+                            color: theme.colorScheme.tertiary.withOpacity(0.2),
                             shape: BoxShape.circle,
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Icon(
                               Icons.emoji_events_outlined,
                               size: 80,
-                              color: AppColors.lightText,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -148,10 +144,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.white.withOpacity(0.15),
+                      color: theme.colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.white.withOpacity(0.3),
+                        color: theme.colorScheme.outline.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
@@ -159,9 +155,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                       widget.gameId != null
                           ? 'هیچ پێشەنگێک نییە بۆ ئەم یارییە'
                           : 'هێشتا هیچ پێشەنگێک نییە',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
-                        color: AppColors.lightText,
+                        color: theme.colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
@@ -185,8 +181,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                            foregroundColor: AppColors.lightText,
-                            backgroundColor: AppColors.accentYellow,
+                            foregroundColor: theme.colorScheme.onTertiary,
+                            backgroundColor: theme.colorScheme.tertiary,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
                               vertical: 12,
@@ -194,10 +190,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            elevation: 8,
-                            shadowColor: AppColors.accentYellow.withOpacity(
-                              0.5,
-                            ),
+                            elevation: 4,
+                            shadowColor: theme.colorScheme.shadow,
                           ),
                           icon: const Icon(Icons.refresh),
                           label: const Text(
@@ -222,6 +216,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           if (winners.isNotEmpty) {
             print('First entry: ${winners.first}');
           }
+
+          final theme = Theme.of(context);
 
           return CustomScrollView(
             slivers: [
@@ -255,27 +251,27 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                       horizontal: 15,
                     ),
                     decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
+                      gradient: AppTheme.getPrimaryGradient(),
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.black.withOpacity(0.2),
+                          color: theme.shadowColor.withOpacity(0.2),
                           offset: const Offset(0, 3),
                           blurRadius: 5,
                         ),
                       ],
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Icon(
                           Icons.format_list_numbered,
-                          color: AppColors.lightText,
+                          color: theme.colorScheme.onPrimary,
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Text(
                           'لیستی پێشەنگەکان',
                           style: TextStyle(
-                            color: AppColors.lightText,
+                            color: theme.colorScheme.onPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -307,6 +303,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     // Make sure we have at least one player
     if (topPlayers.isEmpty) return const SizedBox.shrink();
 
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.only(
         top: 20,
@@ -317,17 +315,17 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           // Podium title
           Container(
             margin: const EdgeInsets.only(bottom: 30), // Increased margin to 30
-            child: const Text(
+            child: Text(
               "🏆 پێشەنگەکان 🏆",
               style: TextStyle(
                 fontSize: 22, // Slightly reduced font size
                 fontWeight: FontWeight.bold,
-                color: AppColors.lightText,
+                color: theme.colorScheme.onSurface,
                 shadows: [
                   Shadow(
-                    offset: Offset(1.0, 1.0),
+                    offset: const Offset(1.0, 1.0),
                     blurRadius: 3.0,
-                    color: Color.fromARGB(100, 0, 0, 0),
+                    color: theme.shadowColor.withOpacity(0.3),
                   ),
                 ],
               ),
@@ -399,6 +397,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     required double width,
     bool showCrown = false,
   }) {
+    final theme = Theme.of(context);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.min, // Use min size to prevent overflow
@@ -431,15 +431,14 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                           child: CachedNetworkImage(
                             imageUrl: player['photoUrl'],
                             placeholder:
-                                (context, url) =>
-                                    const CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.white,
-                                    ),
+                                (context, url) => CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.colorScheme.onPrimary,
+                                ),
                             errorWidget:
                                 (context, url, error) => Icon(
                                   Icons.person,
-                                  color: AppColors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   size: position == 1 ? 36 : 28,
                                 ),
                             fit: BoxFit.cover,
@@ -449,7 +448,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                         )
                         : Icon(
                           Icons.person,
-                          color: AppColors.white,
+                          color: theme.colorScheme.onPrimary,
                           size: position == 1 ? 36 : 28,
                         ),
               ),
@@ -461,13 +460,13 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 top: -20, // Reduced distance
                 child: Icon(
                   Icons.workspace_premium,
-                  color: AppColors.accentYellow,
+                  color: theme.colorScheme.tertiary,
                   size: 30, // Reduced size
                   shadows: [
                     Shadow(
                       offset: const Offset(1, 1),
                       blurRadius: 3,
-                      color: AppColors.black.withOpacity(0.3),
+                      color: theme.shadowColor.withOpacity(0.3),
                     ),
                   ],
                 ),
@@ -483,10 +482,13 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: color,
-                  border: Border.all(color: AppColors.white, width: 1.5),
+                  border: Border.all(
+                    color: theme.colorScheme.surface,
+                    width: 1.5,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.black.withOpacity(0.3),
+                      color: theme.shadowColor.withOpacity(0.3),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -495,8 +497,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 child: Center(
                   child: Text(
                     position.toString(),
-                    style: const TextStyle(
-                      color: AppColors.lightText,
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 12, // Reduced font size
                     ),
@@ -517,7 +519,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: AppColors.lightText,
+              color: theme.colorScheme.onSurface,
               fontWeight: FontWeight.bold,
               fontSize: position == 1 ? 14 : 12, // Reduced font size
             ),
@@ -539,16 +541,16 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.star,
-                color: AppColors.accentYellow,
+                color: theme.colorScheme.tertiary,
                 size: 12, // Reduced size
               ),
               const SizedBox(width: 2), // Reduced spacing
               Text(
                 '${player['score'] ?? 0}',
-                style: const TextStyle(
-                  color: AppColors.lightText,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                   fontSize: 12, // Reduced font size
                 ),
@@ -570,7 +572,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withOpacity(0.3),
+                color: theme.shadowColor.withOpacity(0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -579,27 +581,27 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           child: Center(
             child:
                 position == 1
-                    ? const Text(
+                    ? Text(
                       "١",
                       style: TextStyle(
-                        color: AppColors.lightText,
+                        color: theme.colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
                         fontSize: 44, // Reduced font size
                       ),
                     )
                     : position == 2
-                    ? const Text(
+                    ? Text(
                       "٢",
                       style: TextStyle(
-                        color: AppColors.lightText,
+                        color: theme.colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
                         fontSize: 36, // Reduced font size
                       ),
                     )
-                    : const Text(
+                    : Text(
                       "٣",
                       style: TextStyle(
-                        color: AppColors.lightText,
+                        color: theme.colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
                         fontSize: 36, // Reduced font size
                       ),
@@ -614,26 +616,24 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     // Skip the top 3 players as they are already shown in the podium
     if (index < 3) return const SizedBox.shrink();
 
+    final theme = Theme.of(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.surface2.withOpacity(0.8),
-            AppColors.surface1.withOpacity(0.9),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.2),
+            color: theme.shadowColor.withOpacity(0.2),
             offset: const Offset(0, 2),
             blurRadius: 4,
           ),
         ],
-        border: Border.all(color: AppColors.border2, width: 1),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -644,11 +644,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.primaryRed.withOpacity(0.7),
+                color: theme.colorScheme.primary.withOpacity(0.7),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.black.withOpacity(0.2),
+                    color: theme.shadowColor.withOpacity(0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -657,8 +657,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
               child: Center(
                 child: Text(
                   '${index + 1}',
-                  style: const TextStyle(
-                    color: AppColors.lightText,
+                  style: TextStyle(
+                    color: theme.colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -674,7 +674,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.black.withOpacity(0.2),
+                    color: theme.shadowColor.withOpacity(0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -682,7 +682,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
               ),
               child: CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColors.primaryTeal.withOpacity(0.5),
+                backgroundColor: theme.colorScheme.secondary.withOpacity(0.5),
                 child:
                     player['photoUrl'] != null &&
                             player['photoUrl'].toString().isNotEmpty
@@ -690,15 +690,14 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                           child: CachedNetworkImage(
                             imageUrl: player['photoUrl'],
                             placeholder:
-                                (context, url) =>
-                                    const CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: AppColors.white,
-                                    ),
+                                (context, url) => CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.colorScheme.onSecondary,
+                                ),
                             errorWidget:
-                                (context, url, error) => const Icon(
+                                (context, url, error) => Icon(
                                   Icons.person,
-                                  color: AppColors.white,
+                                  color: theme.colorScheme.onSecondary,
                                   size: 20,
                                 ),
                             fit: BoxFit.cover,
@@ -706,9 +705,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                             height: 40,
                           ),
                         )
-                        : const Icon(
+                        : Icon(
                           Icons.person,
-                          color: AppColors.white,
+                          color: theme.colorScheme.onSecondary,
                           size: 20,
                         ),
               ),
@@ -723,8 +722,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 children: [
                   Text(
                     player['displayName'] ?? 'Unknown',
-                    style: const TextStyle(
-                      color: AppColors.lightText,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -736,16 +735,16 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                       padding: const EdgeInsets.only(top: 4),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.emoji_events_outlined,
-                            color: AppColors.accentYellow,
+                            color: theme.colorScheme.tertiary,
                             size: 14,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             '${player['gamesWon'] ?? 0} یاری براوە',
                             style: TextStyle(
-                              color: AppColors.mediumText,
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
@@ -760,11 +759,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
+                gradient: AppTheme.getPrimaryGradient(),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryRed.withOpacity(0.3),
+                    color: theme.colorScheme.primary.withOpacity(0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -773,16 +772,12 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.star,
-                    color: AppColors.accentYellow,
-                    size: 16,
-                  ),
+                  Icon(Icons.star, color: theme.colorScheme.tertiary, size: 16),
                   const SizedBox(width: 4),
                   Text(
                     '${player['score'] ?? 0}',
-                    style: const TextStyle(
-                      color: AppColors.lightText,
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),

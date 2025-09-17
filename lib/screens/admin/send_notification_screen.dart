@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/notification_service.dart';
 import '../../services/broadcast_notification_service.dart';
-import '../../widgets/common/gradient_background.dart';
+import '../../widgets/common/theme_aware_gradient_background.dart';
 
 class SendNotificationScreen extends ConsumerStatefulWidget {
   const SendNotificationScreen({super.key});
@@ -149,11 +148,13 @@ class _SendNotificationScreenState
 
   @override
   Widget build(BuildContext context) {
-    return GradientBackground(
+    final theme = Theme.of(context);
+
+    return ThemeAwareGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('ناردنی ئاگاداری'),
+          title: Text('ناردنی ئاگاداری', style: theme.textTheme.titleLarge),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -167,12 +168,14 @@ class _SendNotificationScreenState
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1F36).withOpacity(0.7),
+                    color: theme.colorScheme.surface.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    border: Border.all(
+                      color: theme.dividerColor.withOpacity(0.3),
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: theme.shadowColor.withOpacity(0.2),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -181,20 +184,17 @@ class _SendNotificationScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'ناردنی ئاگاداری بۆ هەموو بەکارهێنەران',
-                        style: TextStyle(
-                          fontSize: 18,
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'ئەم ئاگادارییە بۆ هەموو بەکارهێنەرانی ئەپلیکەیشنەکە دەنێردرێت (بۆ هەموو ئامێرەکان)',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white.withOpacity(0.7),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -202,21 +202,22 @@ class _SendNotificationScreenState
                       // Title field
                       TextFormField(
                         controller: _titleController,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                         decoration: InputDecoration(
                           labelText: 'ناونیشان',
                           labelStyle: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
                           ),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
+                          fillColor: theme.colorScheme.surfaceContainerHighest
+                              .withOpacity(0.3),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
                           ),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.title,
-                            color: Colors.amber,
+                            color: theme.colorScheme.secondary,
                           ),
                         ),
                         validator: (value) {
@@ -232,21 +233,22 @@ class _SendNotificationScreenState
                       // Description field
                       TextFormField(
                         controller: _descriptionController,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: theme.colorScheme.onSurface),
                         decoration: InputDecoration(
                           labelText: 'ناوەڕۆک',
                           labelStyle: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
                           ),
                           filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
+                          fillColor: theme.colorScheme.surfaceContainerHighest
+                              .withOpacity(0.3),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
                           ),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.description,
-                            color: Colors.amber,
+                            color: theme.colorScheme.secondary,
                           ),
                         ),
                         maxLines: 5,
@@ -266,31 +268,30 @@ class _SendNotificationScreenState
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _sendNotification,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amber,
-                            foregroundColor: Colors.black,
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            disabledBackgroundColor: Colors.amber.withOpacity(
-                              0.5,
-                            ),
+                            disabledBackgroundColor: theme.colorScheme.primary
+                                .withOpacity(0.5),
                           ),
                           child:
                               _isLoading
-                                  ? const SizedBox(
+                                  ? SizedBox(
                                     width: 24,
                                     height: 24,
                                     child: CircularProgressIndicator(
-                                      color: Colors.black,
+                                      color: theme.colorScheme.onPrimary,
                                       strokeWidth: 2,
                                     ),
                                   )
-                                  : const Text(
+                                  : Text(
                                     'ناردنی ئاگاداری',
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                    style: theme.textTheme.labelLarge?.copyWith(
                                       fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onPrimary,
                                     ),
                                   ),
                         ),
@@ -302,21 +303,27 @@ class _SendNotificationScreenState
                       OutlinedButton(
                         onPressed: _isLoading ? null : _sendTestNotification,
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.amber,
-                          side: const BorderSide(color: Colors.amber),
+                          foregroundColor: theme.colorScheme.primary,
+                          side: BorderSide(color: theme.colorScheme.primary),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle_outline),
-                            SizedBox(width: 8),
+                            Icon(
+                              Icons.check_circle_outline,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
                             Text(
                               'ناردنی تاقیکردنەوە',
-                              style: TextStyle(fontSize: 14),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: theme.colorScheme.primary,
+                              ),
                             ),
                           ],
                         ),
@@ -328,26 +335,25 @@ class _SendNotificationScreenState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.2),
+                          color: theme.colorScheme.primary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.blue.withOpacity(0.5),
+                            color: theme.colorScheme.primary.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.info_outline,
-                              color: Colors.blue,
+                              color: theme.colorScheme.primary,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'ئەم ئاگادارییانە بە Firestore دەنێردرێن و لە هەموو ئامێرەکاندا دەردەکەون',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 12,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                 ),
                               ),
                             ),
@@ -361,18 +367,25 @@ class _SendNotificationScreenState
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.2),
+                            color: Colors.green.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.green),
+                            border: Border.all(
+                              color: Colors.green.withOpacity(0.3),
+                            ),
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
-                              Icon(Icons.check_circle, color: Colors.green),
-                              SizedBox(width: 8),
+                              const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'ئاگادارییەکە بە سەرکەوتوویی نێردرا!',
-                                  style: TextStyle(color: Colors.white),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
                               ),
                             ],
@@ -386,18 +399,22 @@ class _SendNotificationScreenState
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.2),
+                            color: theme.colorScheme.error.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red),
+                            border: Border.all(
+                              color: theme.colorScheme.error.withOpacity(0.3),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error, color: Colors.red),
+                              Icon(Icons.error, color: theme.colorScheme.error),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _errorMessage!,
-                                  style: const TextStyle(color: Colors.white),
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
                               ),
                             ],
