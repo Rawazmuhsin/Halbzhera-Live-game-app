@@ -4,8 +4,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import '../../widgets/common/theme_aware_gradient_background.dart';
 import '../../utils/constants.dart';
-import '../../widgets/common/gradient_background.dart';
 import '../../widgets/common/social_media_links.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -34,7 +34,7 @@ class _AboutScreenState extends State<AboutScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GradientBackground(
+      body: ThemeAwareGradientBackground(
         child: SafeArea(
           child: Column(
             children: [
@@ -59,15 +59,16 @@ class _AboutScreenState extends State<AboutScreen>
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.lightText),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: AppDimensions.paddingS),
           Text(
             'دەربارەی ئێمە',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(color: AppColors.lightText),
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
         ],
       ),
@@ -75,16 +76,18 @@ class _AboutScreenState extends State<AboutScreen>
   }
 
   Widget _buildTabBar() {
+    final theme = Theme.of(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingM),
       decoration: BoxDecoration(
-        color: AppColors.surface2,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusL),
       ),
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.white,
-        unselectedLabelColor: AppColors.mediumText,
+        labelColor: theme.colorScheme.onPrimary,
+        unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.7),
         indicator: BoxDecoration(
           gradient: AppColors.primaryGradient,
           borderRadius: BorderRadius.circular(AppDimensions.radiusL),
@@ -110,9 +113,7 @@ class _AboutScreenState extends State<AboutScreen>
               children: [
                 Text(
                   'هەڵبژێرە یارییەکی زیندووە کە بە شێوەیەکی ڕاستەوخۆ لە کاتی دیاریکراودا بەڕێوە دەچێت. بەشداربووان دەتوانن خۆیان تۆمار بکەن و بەشداری یارییەکان بکەن بۆ وەرگرتنی خەڵات و خاڵ.',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: AppDimensions.paddingM),
                 Image.asset(
@@ -132,9 +133,7 @@ class _AboutScreenState extends State<AboutScreen>
               children: [
                 Text(
                   'بەشداربووان لە هەر یاریەکدا خاڵ کۆدەکەنەوە بەپێی:',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: AppDimensions.paddingS),
                 _buildPointItem('وەڵامی ڕاست', '10 خاڵ بۆ هەر پرسیارێک'),
@@ -149,16 +148,12 @@ class _AboutScreenState extends State<AboutScreen>
                 const SizedBox(height: AppDimensions.paddingM),
                 Text(
                   'خەڵاتەکان:',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleMedium?.copyWith(color: AppColors.lightText),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: AppDimensions.paddingS),
                 Text(
                   'بەشداربووانی سەرکەوتوو خەڵاتی نەختینە و دیاری تایبەت وەردەگرن کە لە کۆتایی هەر یارییەک ڕادەگەیەنرێن.',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: AppColors.lightText),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -200,9 +195,7 @@ class _AboutScreenState extends State<AboutScreen>
               children: [
                 Text(
                   'یارییەکانی هەڵبژێرە لەلایەن تیمێکی پسپۆڕەوە بەڕێوە دەبرێن:',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: AppDimensions.paddingM),
                 _buildManagementItem(
@@ -238,9 +231,7 @@ class _AboutScreenState extends State<AboutScreen>
               children: [
                 Text(
                   'یارییەکانی هەڵبژێرە لەلایەن ئەم تیمەوە بەڕێوە دەبرێن و گەشە پێدەدرێن:',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppColors.lightText),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
             ),
@@ -298,15 +289,17 @@ class _AboutScreenState extends State<AboutScreen>
     required String description,
     required List<String> skills,
   }) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.surface2,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-        border: Border.all(color: AppColors.border1.withOpacity(0.3)),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.1),
+            color: theme.shadowColor.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -343,10 +336,13 @@ class _AboutScreenState extends State<AboutScreen>
                         height: 90,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.white, width: 3),
+                          border: Border.all(
+                            color: theme.colorScheme.onPrimary,
+                            width: 3,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.black.withOpacity(0.2),
+                              color: theme.shadowColor.withOpacity(0.2),
                               blurRadius: 10,
                               offset: const Offset(0, 5),
                             ),
@@ -368,7 +364,7 @@ class _AboutScreenState extends State<AboutScreen>
                               style: Theme.of(
                                 context,
                               ).textTheme.titleLarge?.copyWith(
-                                color: AppColors.white,
+                                color: theme.colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -379,15 +375,20 @@ class _AboutScreenState extends State<AboutScreen>
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.white.withOpacity(0.2),
+                                color: theme.colorScheme.onPrimary.withOpacity(
+                                  0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(
                                   AppDimensions.radiusM,
                                 ),
                               ),
                               child: Text(
                                 role,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: AppColors.white),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onPrimary,
+                                ),
                               ),
                             ),
                           ],
@@ -408,20 +409,18 @@ class _AboutScreenState extends State<AboutScreen>
               children: [
                 Text(
                   description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.lightText,
-                    height: 1.5,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(height: 1.5),
                 ),
                 const SizedBox(height: AppDimensions.paddingM),
 
                 // Skills section
                 Text(
                   'شارەزاییەکان:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppColors.lightText,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: AppDimensions.paddingS),
                 Wrap(
@@ -439,30 +438,37 @@ class _AboutScreenState extends State<AboutScreen>
   }
 
   Widget _buildSkillChip(String skill) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.paddingM,
         vertical: AppDimensions.paddingXS,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface3,
+        color: theme.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(AppDimensions.radiusXXL),
-        border: Border.all(color: AppColors.border1),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Text(
         skill,
-        style: TextStyle(color: AppColors.mediumText, fontSize: 12),
+        style: TextStyle(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontSize: 12,
+        ),
       ),
     );
   }
 
   Widget _buildSectionCard({required String title, required Widget child}) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.surface2,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-        border: Border.all(color: AppColors.border1.withOpacity(0.3)),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -478,8 +484,8 @@ class _AboutScreenState extends State<AboutScreen>
             ),
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.white,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -494,25 +500,26 @@ class _AboutScreenState extends State<AboutScreen>
   }
 
   Widget _buildPointItem(String title, String points) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimensions.paddingS),
       child: Row(
         children: [
-          const Icon(Icons.star, color: AppColors.accentYellow, size: 18),
+          Icon(Icons.star, color: AppColors.accentYellow, size: 18),
           const SizedBox(width: AppDimensions.paddingS),
           Text(
             title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.lightText,
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(width: AppDimensions.paddingS),
           Text(
             '- $points',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.mediumText),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.7),
+            ),
           ),
         ],
       ),
@@ -520,6 +527,8 @@ class _AboutScreenState extends State<AboutScreen>
   }
 
   Widget _buildStepItem(int number, String title, String description) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimensions.paddingM),
       child: Row(
@@ -535,8 +544,8 @@ class _AboutScreenState extends State<AboutScreen>
             child: Center(
               child: Text(
                 '$number',
-                style: const TextStyle(
-                  color: AppColors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -549,17 +558,16 @@ class _AboutScreenState extends State<AboutScreen>
               children: [
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.lightText,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: AppColors.mediumText),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
                 ),
               ],
             ),
@@ -570,6 +578,8 @@ class _AboutScreenState extends State<AboutScreen>
   }
 
   Widget _buildManagementItem(String title, String description) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimensions.paddingM),
       child: Column(
@@ -577,16 +587,11 @@ class _AboutScreenState extends State<AboutScreen>
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.check_circle,
-                color: AppColors.primaryRed,
-                size: 18,
-              ),
+              Icon(Icons.check_circle, color: AppColors.primaryRed, size: 18),
               const SizedBox(width: AppDimensions.paddingS),
               Text(
                 title,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.lightText,
+                style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -597,9 +602,9 @@ class _AboutScreenState extends State<AboutScreen>
             padding: const EdgeInsets.only(left: AppDimensions.paddingL),
             child: Text(
               description,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.mediumText),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
           ),
         ],
