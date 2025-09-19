@@ -90,14 +90,13 @@ class AppTheme {
       ),
 
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: AppColors.surface2,
-        shadowColor: AppColors.black.withOpacity(0.3),
         elevation: AppDimensions.elevation2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+          borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusL)),
         ),
-        margin: const EdgeInsets.all(AppDimensions.paddingS),
+        margin: EdgeInsets.all(AppDimensions.paddingS),
       ),
 
       // Input Decoration Theme
@@ -141,18 +140,18 @@ class AppTheme {
       ),
 
       // Dialog Theme
-      dialogTheme: DialogTheme(
+      dialogTheme: const DialogThemeData(
         backgroundColor: AppColors.surface2,
         elevation: AppDimensions.elevation4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
+          borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusXL)),
         ),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: AppColors.lightText,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
-        contentTextStyle: const TextStyle(
+        contentTextStyle: TextStyle(
           color: AppColors.mediumText,
           fontSize: 14,
         ),
@@ -219,7 +218,7 @@ class AppTheme {
       ),
 
       // Tab Bar Theme
-      tabBarTheme: const TabBarTheme(
+      tabBarTheme: const TabBarThemeData(
         labelColor: AppColors.primaryRed,
         unselectedLabelColor: AppColors.mediumText,
         indicatorColor: AppColors.primaryRed,
