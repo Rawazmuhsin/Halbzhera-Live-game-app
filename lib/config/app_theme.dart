@@ -94,7 +94,9 @@ class AppTheme {
         color: AppColors.surface2,
         elevation: AppDimensions.elevation2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusL)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(AppDimensions.radiusL),
+          ),
         ),
         margin: EdgeInsets.all(AppDimensions.paddingS),
       ),
@@ -144,17 +146,16 @@ class AppTheme {
         backgroundColor: AppColors.surface2,
         elevation: AppDimensions.elevation4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusXL)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(AppDimensions.radiusXL),
+          ),
         ),
         titleTextStyle: TextStyle(
           color: AppColors.lightText,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
-        contentTextStyle: TextStyle(
-          color: AppColors.mediumText,
-          fontSize: 14,
-        ),
+        contentTextStyle: TextStyle(color: AppColors.mediumText, fontSize: 14),
       ),
 
       // Snack Bar Theme
