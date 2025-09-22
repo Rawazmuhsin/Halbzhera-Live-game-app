@@ -3,6 +3,7 @@ import '../screens/auth/auth_gate.dart';
 import '../screens/admin/admin_home_screen.dart';
 import '../screens/leaderboard/leaderboard_screen.dart';
 import '../screens/about/about_screen.dart';
+import '../screens/settings/settings_screen.dart';
 
 class AppRoutes {
   static const String authGate = '/';
@@ -10,6 +11,7 @@ class AppRoutes {
   static const String leaderboard = '/leaderboard';
   static const String gameLeaderboard = '/game-leaderboard';
   static const String about = '/about';
+  static const String settings = '/settings';
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     // Extract any arguments if available
@@ -34,6 +36,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const LeaderboardScreen());
       case about:
         return MaterialPageRoute(builder: (_) => const AboutScreen());
+      case '/settings':
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
       default:
         return MaterialPageRoute(
           builder:
