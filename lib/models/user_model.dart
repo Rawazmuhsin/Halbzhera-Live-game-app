@@ -16,6 +16,7 @@ class UserModel {
   final int gamesPlayed;
   final int gamesWon;
   final DateTime createdAt;
+  final DateTime? firstLoginAt; // Only set on first registration
   final DateTime lastSeen;
   final bool isOnline;
   final Map<String, dynamic> preferences;
@@ -30,6 +31,7 @@ class UserModel {
     this.gamesPlayed = 0,
     this.gamesWon = 0,
     required this.createdAt,
+    this.firstLoginAt,
     required this.lastSeen,
     this.isOnline = false,
     this.preferences = const {},
@@ -56,6 +58,7 @@ class UserModel {
       photoURL: user.photoURL,
       provider: userProvider,
       createdAt: DateTime.now(),
+      // Don't set firstLoginAt here - it will be set by the database service
       lastSeen: DateTime.now(),
       isOnline: true,
     );
@@ -75,6 +78,7 @@ class UserModel {
       gamesPlayed: data['gamesPlayed'] ?? 0,
       gamesWon: data['gamesWon'] ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      firstLoginAt: (data['firstLoginAt'] as Timestamp?)?.toDate(),
       lastSeen: (data['lastSeen'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isOnline: data['isOnline'] ?? false,
       preferences: Map<String, dynamic>.from(data['preferences'] ?? {}),
@@ -83,7 +87,7 @@ class UserModel {
 
   // Convert to Firestore document
   Map<String, dynamic> toFirestore() {
-    return {
+    final data = {
       'email': email,
       'displayName': displayName,
       'photoURL': photoURL,
@@ -96,6 +100,13 @@ class UserModel {
       'isOnline': isOnline,
       'preferences': preferences,
     };
+
+    // Only include firstLoginAt if it's not null
+    if (firstLoginAt != null) {
+      data['firstLoginAt'] = Timestamp.fromDate(firstLoginAt!);
+    }
+
+    return data;
   }
 
   // Copy with method for updates
@@ -109,6 +120,7 @@ class UserModel {
     int? gamesPlayed,
     int? gamesWon,
     DateTime? createdAt,
+    DateTime? firstLoginAt,
     DateTime? lastSeen,
     bool? isOnline,
     Map<String, dynamic>? preferences,
@@ -123,6 +135,7 @@ class UserModel {
       gamesPlayed: gamesPlayed ?? this.gamesPlayed,
       gamesWon: gamesWon ?? this.gamesWon,
       createdAt: createdAt ?? this.createdAt,
+      firstLoginAt: firstLoginAt ?? this.firstLoginAt,
       lastSeen: lastSeen ?? this.lastSeen,
       isOnline: isOnline ?? this.isOnline,
       preferences: preferences ?? this.preferences,

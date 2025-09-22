@@ -29,14 +29,18 @@ final currentUserProvider = Provider<User?>((ref) {
 });
 
 // Current user model provider
-final currentUserModelProvider = StreamProvider<UserModel?>((ref) {
+// Current user model provider (gets full user data from Firestore)
+final currentUserModelProvider = FutureProvider<UserModel?>((ref) async {
   final user = ref.watch(currentUserProvider);
-  if (user == null) {
-    return Stream.value(null);
-  }
+  if (user == null) return null;
 
   final databaseService = ref.read(databaseServiceProvider);
-  return databaseService.getUserStream(user.uid);
+
+  // First ensure user data is migrated if needed
+  await databaseService.migrateUserDataFields();
+
+  // Then get the user data
+  return await databaseService.getUser(user.uid);
 });
 
 // ============================================================================

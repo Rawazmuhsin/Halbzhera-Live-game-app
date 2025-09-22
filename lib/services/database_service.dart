@@ -22,9 +22,32 @@ class DatabaseService {
   // Create or update user
   Future<void> createOrUpdateUser(UserModel user) async {
     try {
-      await FirebaseConfig.getUserDoc(
-        user.uid,
-      ).set(user.toFirestore(), SetOptions(merge: true));
+      // Check if user already exists
+      final existingDoc = await FirebaseConfig.getUserDoc(user.uid).get();
+
+      if (existingDoc.exists) {
+        // User exists - update only necessary fields without touching firstLoginAt
+        await FirebaseConfig.getUserDoc(user.uid).update({
+          'email': user.email,
+          'displayName': user.displayName,
+          'photoURL': user.photoURL,
+          'provider': user.provider.index,
+          'lastSeen': FieldValue.serverTimestamp(),
+          'isOnline': user.isOnline,
+          // Don't update createdAt or firstLoginAt for existing users
+        });
+      } else {
+        // New user - set both createdAt and firstLoginAt to current time
+        final now = DateTime.now();
+        final userWithFirstLogin = user.copyWith(
+          createdAt: now,
+          firstLoginAt: now,
+        );
+        await FirebaseConfig.getUserDoc(user.uid).set(
+          userWithFirstLogin.toFirestore(),
+          SetOptions(merge: false), // Don't merge for new users
+        );
+      }
     } catch (e) {
       throw Exception('Failed to create/update user: $e');
     }
@@ -84,12 +107,31 @@ class DatabaseService {
         await FirebaseConfig.getUserDoc(uid).update({
           'totalScore': FieldValue.increment(scoreToAdd),
           'gamesPlayed': FieldValue.increment(1),
+          'lastSeen': FieldValue.serverTimestamp(),
         });
       } else {
         print('User document $uid not found, skipping score update');
       }
     } catch (e) {
       throw Exception('Failed to update user score: $e');
+    }
+  }
+
+  // Update user win count (separate method for better tracking)
+  Future<void> updateUserWinCount(String uid) async {
+    try {
+      final docSnapshot = await FirebaseConfig.getUserDoc(uid).get();
+
+      if (docSnapshot.exists) {
+        await FirebaseConfig.getUserDoc(uid).update({
+          'gamesWon': FieldValue.increment(1),
+          'lastSeen': FieldValue.serverTimestamp(),
+        });
+      } else {
+        print('User document $uid not found, skipping win count update');
+      }
+    } catch (e) {
+      throw Exception('Failed to update user win count: $e');
     }
   }
 
@@ -403,8 +445,9 @@ class DatabaseService {
         'endReason': 'winner_found',
       });
 
-      // Update winner's score and stats
+      // Update winner's score and stats with bonus points for winning
       await updateUserScore(winnerId, 500); // Bonus points for winning
+      await updateUserWinCount(winnerId); // Increment win count
 
       print('Game $gameId ended with winner: $winnerId');
     } catch (e) {
@@ -789,6 +832,9 @@ class DatabaseService {
   // Get global leaderboard
   Future<List<UserModel>> getLeaderboard({int limit = 10}) async {
     try {
+      // First run migration to ensure data consistency
+      await migrateUserDataFields();
+
       final querySnapshot =
           await FirebaseConfig.users
               .orderBy('totalScore', descending: true)
@@ -881,6 +927,67 @@ class DatabaseService {
   // ============================================================================
   // UTILITY METHODS
   // ============================================================================
+
+  // Migrate user data to fix field name inconsistencies
+  Future<void> migrateUserDataFields() async {
+    try {
+      print('Starting user data migration...');
+
+      // Get all users
+      final usersSnapshot = await FirebaseConfig.users.get();
+      final batch = _firestore.batch();
+      int migratedCount = 0;
+
+      for (final userDoc in usersSnapshot.docs) {
+        final data = userDoc.data() as Map<String, dynamic>;
+        bool needsUpdate = false;
+        Map<String, dynamic> updates = {};
+
+        // Check if user has totalGamesPlayed instead of gamesPlayed
+        if (data.containsKey('totalGamesPlayed') &&
+            !data.containsKey('gamesPlayed')) {
+          updates['gamesPlayed'] = data['totalGamesPlayed'];
+          needsUpdate = true;
+        }
+
+        // Ensure all required fields exist with default values
+        if (!data.containsKey('gamesPlayed')) {
+          updates['gamesPlayed'] = 0;
+          needsUpdate = true;
+        }
+        if (!data.containsKey('gamesWon')) {
+          updates['gamesWon'] = 0;
+          needsUpdate = true;
+        }
+        if (!data.containsKey('totalScore')) {
+          updates['totalScore'] = 0;
+          needsUpdate = true;
+        }
+
+        // Migrate firstLoginAt field - use createdAt if firstLoginAt doesn't exist
+        if (!data.containsKey('firstLoginAt') &&
+            data.containsKey('createdAt')) {
+          updates['firstLoginAt'] = data['createdAt'];
+          needsUpdate = true;
+        }
+
+        if (needsUpdate) {
+          batch.update(userDoc.reference, updates);
+          migratedCount++;
+        }
+      }
+
+      if (migratedCount > 0) {
+        await batch.commit();
+        print('✅ Migrated $migratedCount user records');
+      } else {
+        print('✅ No user records needed migration');
+      }
+    } catch (e) {
+      print('❌ Error during user data migration: $e');
+      throw Exception('Failed to migrate user data: $e');
+    }
+  }
 
   // Delete user
   Future<void> deleteUser(String uid) async {
