@@ -27,7 +27,7 @@ android {
         applicationId = "com.example.halbzhera"
         
         // Change this line from flutter.minSdkVersion to 23
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

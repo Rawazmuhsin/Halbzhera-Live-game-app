@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../utils/constants.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/live_game_provider.dart';
@@ -12,6 +13,8 @@ import '../../screens/admin/create_game_screen.dart';
 import '../../screens/admin/add_questions_screen.dart';
 import '../../screens/admin/send_notification_screen.dart';
 import '../../widgets/common/loading_widget.dart';
+import '../../services/database_service.dart';
+import '../../config/firebase_config.dart';
 import 'stat_card.dart';
 import 'action_card.dart';
 import 'recent_activity_card.dart';
@@ -175,6 +178,18 @@ class OverviewTab extends ConsumerWidget {
                   color: AppColors.success,
                   onTap: () => _navigateToLiveMonitor(context),
                 ),
+                ActionCard(
+                  title: 'چاککردنی ئامارەکان',
+                  icon: Icons.build,
+                  color: Colors.purple,
+                  onTap: () => _migrateUserData(context),
+                ),
+                ActionCard(
+                  title: 'تاقیکردنەوەی دراوەکان',
+                  icon: Icons.bug_report,
+                  color: Colors.orange.shade700,
+                  onTap: () => _debugUserData(context),
+                ),
               ],
             );
           },
@@ -293,6 +308,162 @@ class OverviewTab extends ConsumerWidget {
       context,
       MaterialPageRoute(builder: (context) => const SendNotificationScreen()),
     );
+  }
+
+  void _migrateUserData(BuildContext context) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('چاککردنی ئامارەکان'),
+            content: const Text(
+              'ئەمە ئامارەکانی بەکارهێنەران چاک دەکات (یاری کراو، بردنەوە، خاڵ). ئەمە چەند خولەکێک لەوانەیە بخایەنێت.\n\nدەتەوێت بەردەوام بیت؟',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('نەخێر'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('بەڵێ'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => const AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('چاککردنی ئامارەکان...'),
+                ],
+              ),
+            ),
+      );
+
+      try {
+        final databaseService = DatabaseService();
+        await databaseService.migrateUserDataFields();
+
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ئامارەکان بەسەرکەوتوویی چاک کران!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } catch (e) {
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('هەڵەیەک ڕوویدا: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _debugUserData(BuildContext context) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final currentUser = auth.currentUser;
+
+      if (currentUser == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تکایە چوونەژوورەوە بکە'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      // Get current user's raw data from Firestore
+      final userDoc = await FirebaseConfig.getUserDoc(currentUser.uid).get();
+
+      if (!userDoc.exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('هیچ دراوەیەک بۆ ئەم بەکارهێنەرە نەدۆزرایەوە'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      final userData = userDoc.data() as Map<String, dynamic>;
+
+      // Show debug dialog with raw user data
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('دراوەکانی بەکارهێنەر'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('ناسنامە: ${currentUser.uid}'),
+                    const SizedBox(height: 8),
+                    Text('ناو: ${userData['displayName'] ?? 'نادیار'}'),
+                    const SizedBox(height: 8),
+                    Text(
+                      'گەمەکانی یاری کراو: ${userData['gamesPlayed'] ?? 'نیە'}',
+                    ),
+                    const SizedBox(height: 8),
+                    Text('گەمەکانی بردووە: ${userData['gamesWon'] ?? 'نیە'}'),
+                    const SizedBox(height: 8),
+                    Text('کۆی خاڵەکان: ${userData['totalScore'] ?? 'نیە'}'),
+                    const SizedBox(height: 8),
+                    Text(
+                      'کۆی گەمەکانی یاری کراو (کۆن): ${userData['totalGamesPlayed'] ?? 'نیە'}',
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'هەموو کلیلەکان:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    ...userData.keys.map(
+                      (key) => Text('$key: ${userData[key]}'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('داخستن'),
+                ),
+              ],
+            ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('هەڵەیەک ڕوویدا: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   void _navigateToFullActivity() {
