@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 
@@ -289,6 +290,17 @@ class NotificationService {
     debugPrint('🔔 Sending new game notification for: $gameTitle');
 
     try {
+      // Check if notifications are enabled
+      final prefs = await SharedPreferences.getInstance();
+      final notificationsEnabled =
+          prefs.getBool('notifications_enabled') ?? true;
+      if (!notificationsEnabled) {
+        debugPrint(
+          '🔕 Notifications disabled by user, skipping new game notification',
+        );
+        return;
+      }
+
       await _flutterLocalNotificationsPlugin.show(
         gameId.hashCode,
         'بەشداربوونی نوێ: $gameTitle',
@@ -326,6 +338,16 @@ class NotificationService {
     required String gameTitle,
     required DateTime gameStartTime,
   }) async {
+    // Check if notifications are enabled
+    final prefs = await SharedPreferences.getInstance();
+    final notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+    if (!notificationsEnabled) {
+      debugPrint(
+        '🔕 Notifications disabled by user, skipping game reminder notification',
+      );
+      return;
+    }
+
     // Calculate 5 minutes before start time
     final scheduledTime = gameStartTime.subtract(const Duration(minutes: 5));
     final now = DateTime.now();
@@ -768,6 +790,16 @@ class NotificationService {
     } catch (e) {
       debugPrint('❌ Error sending test notification: $e');
       debugPrint('❌ Stack trace: ${StackTrace.current}');
+    }
+  }
+
+  // Cancel all local notifications
+  Future<void> cancelAllLocalNotifications() async {
+    try {
+      await _flutterLocalNotificationsPlugin.cancelAll();
+      debugPrint('✅ All local notifications canceled successfully');
+    } catch (e) {
+      debugPrint('❌ Error canceling local notifications: $e');
     }
   }
 }

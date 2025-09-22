@@ -119,6 +119,18 @@ class BroadcastNotificationService {
           '📩 Processing new broadcast notification: ${data['title']}',
         );
 
+        // Check if notifications are enabled before showing
+        final notificationsEnabled =
+            prefs.getBool('notifications_enabled') ?? true;
+        if (!notificationsEnabled) {
+          debugPrint(
+            '🔕 Notifications disabled by user, skipping broadcast notification',
+          );
+          // Still update the last processed ID to avoid reprocessing
+          await prefs.setString(_lastNotificationIdKey, doc.id);
+          continue;
+        }
+
         // Show local notification on this device
         await _notificationService.sendCustomNotification(
           title: data['title'] ?? 'إشعار جديد',
