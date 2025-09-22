@@ -72,10 +72,11 @@ extension GameResultOperations on DatabaseService {
 
       // Update user statistics
       await FirebaseConfig.getUserDoc(userId).update({
-        'totalGamesPlayed': FieldValue.increment(1),
+        'gamesPlayed': FieldValue.increment(1),
         'gamesWon':
             isWinner ? FieldValue.increment(1) : FieldValue.increment(0),
         'totalScore': FieldValue.increment(score),
+        'lastSeen': FieldValue.serverTimestamp(),
       });
 
       print('Game result saved successfully for user $userId in game $gameId');
@@ -467,7 +468,7 @@ extension GameResultOperations on DatabaseService {
       // Don't throw as this is a background task
     }
   }
-  
+
   // Get all winners across all games (for admin)
   Future<List<GameResultModel>> getAllGameWinners() async {
     try {
