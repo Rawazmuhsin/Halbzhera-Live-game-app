@@ -277,10 +277,12 @@ class PracticeGameNotifier extends StateNotifier<PracticeGameState> {
     // Calculate points with time bonus
     int points = 0;
     if (isCorrect) {
-      points = currentQuestion['points'] as int? ?? 100;
+      points = currentQuestion['points'] as int? ?? 10;
 
       // Time bonus (similar to live game logic)
-      final maxTime = 15; // Default time limit
+      final maxTime =
+          currentQuestion['timeLimit'] as int? ??
+          15; // Use question's time limit
       final timeRatio = timeTaken.inSeconds / maxTime;
 
       if (timeRatio <= 0.3) {
@@ -389,7 +391,7 @@ class PracticeGameNotifier extends StateNotifier<PracticeGameState> {
       'correctAnswer': correctAnswer,
       'isCorrect': isCorrect,
       'timeTaken': timeTaken,
-      'points': isCorrect ? (question['points'] as int? ?? 100) : 0,
+      'points': isCorrect ? (question['points'] as int? ?? 10) : 0,
     };
   }
 

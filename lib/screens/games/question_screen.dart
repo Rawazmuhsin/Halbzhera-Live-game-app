@@ -84,12 +84,15 @@ class QuestionScreen extends ConsumerStatefulWidget {
 class _QuestionScreenState extends ConsumerState<QuestionScreen>
     with TickerProviderStateMixin {
   Timer? _timer;
-  int _timeRemaining = 15; // Default time per question
+  int _timeRemaining = 15; // Will be set to question's actual time limit
   late AnimationController _timerAnimationController;
   int _currentQuestionIndex = 0;
   List<Map<String, dynamic>> _allQuestions = [];
   bool _isLoading = true;
   bool _isSpectator = false; // Indicates if user is eliminated
+  bool _hasLost =
+      false; // NEW: Boolean flag to track if user has lost/eliminated
+  int? _eliminatedAtQuestion; // Track which question user was eliminated at
   String? _selectedAnswer;
   String? _correctAnswer;
   bool _showResult = false; // Shows result after answering
@@ -105,7 +108,9 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
   void _initializeTimerAnimation() {
     _timerAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 15), // Default duration
+      duration: const Duration(
+        seconds: 15,
+      ), // Initial duration, will be updated per question
     );
   }
 
@@ -149,16 +154,35 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
   }
 
   void _startQuestionTimer() {
-    if (_allQuestions.isEmpty || !mounted || _isSpectator) return;
+    if (_allQuestions.isEmpty || !mounted) return;
+
+    // If user has lost, they become spectator but continue to next questions
+    if (_hasLost) {
+      setState(() {
+        _isSpectator = true;
+      });
+    }
+
+    // Get current question's time limit
+    final currentQuestion = _allQuestions[_currentQuestionIndex];
+    final questionTimeLimit = currentQuestion['timeLimit'] as int? ?? 15;
 
     setState(() {
-      _timeRemaining = 15; // Reset timer for each question
+      _timeRemaining = questionTimeLimit; // Use question's actual time limit
       _showResult = false;
       _selectedAnswer = null;
       _answerLocked = false;
     });
 
     _timer?.cancel();
+
+    // Update animation controller duration to match question time limit
+    _timerAnimationController.dispose();
+    _timerAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: questionTimeLimit),
+    );
+    _timerAnimationController.forward();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
@@ -177,9 +201,11 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
               // Time's up without answering - this counts as a wrong answer
               _checkAnswer(null);
 
-              // Mark as spectator because they didn't answer in time
+              // Mark as spectator and lost because they didn't answer in time
               setState(() {
                 _isSpectator = true;
+                _hasLost = true;
+                _eliminatedAtQuestion = _currentQuestionIndex;
               });
 
               // Eliminate player for not answering in time
@@ -226,6 +252,9 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       // User is eliminated
       setState(() {
         _isSpectator = true;
+        _hasLost = true; // Set the loss flag
+        _eliminatedAtQuestion =
+            _currentQuestionIndex; // Remember which question
       });
 
       // Save elimination to Firestore
@@ -238,8 +267,12 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
 
       if (isCorrect) {
         _goToNextQuestion();
+      } else {
+        // If user lost, continue to next question as spectator
+        if (_hasLost) {
+          _goToNextQuestion();
+        }
       }
-      // If incorrect, user stays on current question as spectator
     });
   }
 
@@ -265,9 +298,9 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
     if (userId == null) return;
 
     // Calculate score based on number of questions completed plus a bonus for winning
-    // Each correct question = 100 points + 300 bonus points for winning
-    final questionPoints = _allQuestions.length * 100;
-    final winnerBonus = 300;
+    // Each correct question = 10 points + 15 bonus points for winning
+    final questionPoints = _allQuestions.length * 10;
+    final winnerBonus = 15;
     final score = questionPoints + winnerBonus;
 
     // Save game result with user as winner
@@ -300,7 +333,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
     if (userId == null) return;
 
     // Calculate partial score based on questions answered correctly
-    final score = _currentQuestionIndex * 100; // 100 points per question
+    final score = _currentQuestionIndex * 10; // 10 points per question
 
     // Save game result with user as eliminated
     ref
@@ -326,7 +359,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
   }
 
   void _selectChoice(String choiceAnswer) {
-    if (_showResult || _answerLocked || _isSpectator) return;
+    if (_showResult || _answerLocked || _isSpectator || _hasLost) return;
     _checkAnswer(choiceAnswer);
   }
 
@@ -616,6 +649,113 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
                   ),
                 ),
               ),
+            // Home Button Overlay - Shows when user has lost (only on elimination question)
+            if (_hasLost &&
+                _showResult &&
+                _eliminatedAtQuestion == _currentQuestionIndex)
+              Positioned(
+                top: 100,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF1A1F36), Color(0xFF2A1B3D)],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: const Color(0xFFEF4444).withOpacity(0.5),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.cancel_outlined,
+                          color: Color(0xFFEF4444),
+                          size: 64,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "بەداخەوە دەرچوویت!",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "دەتوانیت گەڕێیتەوە سەرەکی یان سەیری یارییەکە بکەیت",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // Navigate to home page
+                            Navigator.of(
+                              context,
+                            ).popUntil((route) => route.isFirst);
+                          },
+                          icon: const Icon(Icons.home, size: 24),
+                          label: const Text(
+                            "گەڕانەوە بۆ سەرەکی",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2DCCDB),
+                            foregroundColor: const Color(0xFF0B1120),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () {
+                            // Dismiss the overlay - continue as spectator
+                            setState(() {
+                              // Just hide the overlay, user continues as spectator
+                            });
+                          },
+                          child: const Text(
+                            "درێژە پێبدە وەک تەماشاکەر",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF9CA3AF),
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -754,10 +894,16 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
+              final currentQuestion = _allQuestions[_currentQuestionIndex];
+              final questionTimeLimit =
+                  currentQuestion['timeLimit'] as int? ?? 15;
+
               return Stack(
                 children: [
                   Container(
-                    width: constraints.maxWidth * (_timeRemaining / 15),
+                    width:
+                        constraints.maxWidth *
+                        (_timeRemaining / questionTimeLimit),
                     height: 4,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
@@ -802,6 +948,12 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
       }
     } else if (_timeRemaining == 0) {
       messageText = "کات تەواو بوو! پیشاندانی ئەنجامەکان...";
+      messageColor = const Color(0xFFF59E0B);
+      backgroundColor = const Color(0xFFF59E0B).withOpacity(0.1);
+      borderColor = const Color(0xFFF59E0B).withOpacity(0.3);
+    } else if (_hasLost) {
+      messageText =
+          "تۆ دەرچوویت - دەتوانیت سەیری پرسیارەکان بکەیت یان بگەڕێیتەوە سەرەکی";
       messageColor = const Color(0xFFF59E0B);
       backgroundColor = const Color(0xFFF59E0B).withOpacity(0.1);
       borderColor = const Color(0xFFF59E0B).withOpacity(0.3);
@@ -860,7 +1012,7 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
           margin: const EdgeInsets.only(bottom: 16),
           child: GestureDetector(
             onTap:
-                (_showResult || _isSpectator)
+                (_showResult || _isSpectator || _hasLost)
                     ? null
                     : () => _selectChoice(text),
             child: Container(
@@ -1006,14 +1158,71 @@ class _QuestionScreenState extends ConsumerState<QuestionScreen>
   }
 
   Widget _buildResultsSection() {
-    // Calculate actual percentages based on the user's answer
-    final bool isCorrect = _selectedAnswer == _correctAnswer;
+    // Watch the live leaderboard to get real-time statistics
+    final leaderboardAsync = ref.watch(liveLeaderboardProvider(widget.gameId));
 
-    // If the user answers correctly, show 100% correct, 0% wrong
-    // If the user answers incorrectly, show 0% correct, 100% wrong
-    final correctPercentage = isCorrect ? 100 : 0;
-    final wrongPercentage = isCorrect ? 0 : 100;
+    return leaderboardAsync.when(
+      data: (leaderboard) {
+        // Filter only active (non-eliminated) players
+        final activePlayers =
+            leaderboard.where((p) => !p.isEliminated).toList();
 
+        if (activePlayers.isEmpty) {
+          // If no active players, show just this user's result
+          final bool isCorrect = _selectedAnswer == _correctAnswer;
+          final correctPercentage = isCorrect ? 100 : 0;
+          final wrongPercentage = isCorrect ? 0 : 100;
+
+          return _buildResultsBars(correctPercentage, wrongPercentage);
+        }
+
+        // Count how many active players answered correctly for THIS question
+        int correctCount = 0;
+        int totalAnswered = 0;
+
+        for (final player in activePlayers) {
+          final answer = player.getAnswerForQuestion(_currentQuestionIndex);
+          if (answer != null) {
+            totalAnswered++;
+            if (answer['isCorrect'] == true) {
+              correctCount++;
+            }
+          }
+        }
+
+        // Calculate percentages based on active players only
+        final correctPercentage =
+            totalAnswered > 0
+                ? ((correctCount / totalAnswered) * 100).round()
+                : 0;
+        final wrongPercentage =
+            totalAnswered > 0
+                ? (((totalAnswered - correctCount) / totalAnswered) * 100)
+                    .round()
+                : 0;
+
+        return _buildResultsBars(correctPercentage, wrongPercentage);
+      },
+      loading: () {
+        // While loading, show user's own result
+        final bool isCorrect = _selectedAnswer == _correctAnswer;
+        final correctPercentage = isCorrect ? 100 : 0;
+        final wrongPercentage = isCorrect ? 0 : 100;
+
+        return _buildResultsBars(correctPercentage, wrongPercentage);
+      },
+      error: (_, __) {
+        // On error, show user's own result
+        final bool isCorrect = _selectedAnswer == _correctAnswer;
+        final correctPercentage = isCorrect ? 100 : 0;
+        final wrongPercentage = isCorrect ? 0 : 100;
+
+        return _buildResultsBars(correctPercentage, wrongPercentage);
+      },
+    );
+  }
+
+  Widget _buildResultsBars(int correctPercentage, int wrongPercentage) {
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.all(24),

@@ -61,7 +61,7 @@ final realTimeQuestionCountProvider =
    - **Difficulty**: Easy, Medium, or Hard
    - **Options**: Fill in the answer choices (if applicable)
    - **Correct Answer**: Select or type the correct answer
-   - **Points**: Set point value (default 100)
+   - **Points**: Set point value (default 10)
    - **Time Limit**: Set time limit in seconds (default 15)
    - **Explanation**: Optional explanation for the answer
 

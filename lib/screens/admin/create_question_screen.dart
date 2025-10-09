@@ -37,7 +37,7 @@ class _CreateQuestionScreenState extends ConsumerState<CreateQuestionScreen> {
   @override
   void initState() {
     super.initState();
-    _pointsController.text = '100';
+    _pointsController.text = '10';
     _timeLimitController.text = '15';
   }
 
@@ -739,7 +739,7 @@ class _CreateQuestionScreenState extends ConsumerState<CreateQuestionScreen> {
   void _resetForm() {
     _questionController.clear();
     _explanationController.clear();
-    _pointsController.text = '100';
+    _pointsController.text = '10';
     _timeLimitController.text = '15';
 
     setState(() {

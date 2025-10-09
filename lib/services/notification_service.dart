@@ -20,11 +20,11 @@ class NotificationService {
     debugPrint('🔔 Initializing notification service...');
 
     try {
-      // Initialize timezone
+      // Initialize timezone (lightweight operation)
       tz_data.initializeTimeZones();
-      debugPrint('🔔 Timezone initialized.');
-
-      // Subscribe to the 'all' topic to receive global notifications
+      debugPrint(
+        '🔔 Timezone initialized.',
+      ); // Subscribe to the 'all' topic to receive global notifications
       await subscribeToTopic('all');
       debugPrint('🔔 Subscribed to "all" topic for global notifications.');
 

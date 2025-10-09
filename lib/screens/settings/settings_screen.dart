@@ -373,7 +373,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               );
             },
-            activeColor: AppColors.primaryTeal,
+            activeThumbColor: AppColors.primaryTeal,
             activeTrackColor: AppColors.primaryTeal.withOpacity(0.3),
             inactiveThumbColor: AppColors.mediumText,
             inactiveTrackColor: AppColors.mediumText.withOpacity(0.3),

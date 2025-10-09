@@ -3,6 +3,7 @@
 
 // ignore_for_file: deprecated_member_use, avoid_print
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,19 +13,20 @@ import 'config/app_routes.dart';
 import 'screens/auth/auth_gate.dart';
 import 'utils/constants.dart';
 import 'utils/debug_helper.dart';
+import 'services/database_service.dart';
 import 'services/notification_service.dart';
 import 'services/broadcast_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
+  // Set preferred orientations (non-blocking, quick operation)
+  SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Set system UI overlay style
+  // Set system UI overlay style (non-blocking, quick operation)
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -35,42 +37,71 @@ void main() async {
     ),
   );
 
-  // Initialize Firebase
+  // Only initialize Firebase (critical for app to work)
   try {
     await FirebaseConfig.initialize();
     print('✅ Firebase initialized successfully!');
+  } catch (e) {
+    print('❌ Error initializing Firebase: $e');
+  }
 
-    // Initialize notifications
+  // Start app immediately - all other initializations happen in background
+  runApp(ProviderScope(child: MyApp()));
+
+  // Background initialization (non-blocking)
+  _initializeServicesInBackground();
+}
+
+// Initialize services in background after app starts
+Future<void> _initializeServicesInBackground() async {
+  try {
+    print('🔄 Starting background service initialization...');
+
+    // Run database migration once (uses SharedPreferences to track)
+    try {
+      final databaseService = DatabaseService();
+      await databaseService.migrateUserDataFields();
+    } catch (e) {
+      print('⚠️ Migration error (non-critical): $e');
+    }
+
+    // Initialize notifications (can happen after app loads)
     final notificationService = NotificationService();
     await notificationService.initialize();
     print('✅ Notifications initialized successfully!');
 
-    // Initialize broadcast notification service
+    // Defer broadcast listener by 3 seconds to let app load first
+    await Future.delayed(const Duration(seconds: 3));
+
     final broadcastNotificationService = BroadcastNotificationService(
       notificationService,
     );
     broadcastNotificationService.startListeningForBroadcastNotifications();
     print('✅ Broadcast notification listener started successfully!');
 
-    // Check notification permissions
+    // Check notification permissions (non-critical)
     final notificationsAllowed =
         await notificationService.areNotificationsAllowed();
     print('✅ Notifications allowed: $notificationsAllowed');
 
-    // Send test notifications to verify the system works
-    await notificationService.sendTestNotification();
-    print('✅ Test notifications sent');
+    // Skip test notifications in production - only in debug mode
+    if (kDebugMode) {
+      // Defer test notifications by 5 seconds
+      await Future.delayed(const Duration(seconds: 5));
+      await notificationService.sendTestNotification();
+      print('✅ Test notifications sent');
 
-    // Add debug information
-    DebugHelper.logGoogleSignInConfiguration();
-    DebugHelper.logFirebaseConfiguration();
-    await DebugHelper.testGoogleSignInAvailability();
+      // Debug information only in debug mode
+      DebugHelper.logGoogleSignInConfiguration();
+      DebugHelper.logFirebaseConfiguration();
+      await DebugHelper.testGoogleSignInAvailability();
+    }
   } catch (e) {
-    print('❌ Error initializing Firebase or notifications: $e');
-    DebugHelper.printTroubleshootingGuide();
+    print('❌ Error initializing background services: $e');
+    if (kDebugMode) {
+      DebugHelper.printTroubleshootingGuide();
+    }
   }
-
-  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends ConsumerWidget {

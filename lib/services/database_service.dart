@@ -4,6 +4,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/firebase_config.dart';
 import '../models/user_model.dart';
 import '../models/live_game_model.dart';
@@ -317,7 +318,7 @@ class DatabaseService {
       final correctAnswer = question['correctAnswer'] as String? ?? '';
       final isCorrect =
           answer.toLowerCase().trim() == correctAnswer.toLowerCase().trim();
-      final points = question['points'] as int? ?? 100;
+      final points = question['points'] as int? ?? 10;
 
       // 2. Calculate time taken (you might want to pass this as parameter)
       final timeTaken =
@@ -832,9 +833,6 @@ class DatabaseService {
   // Get global leaderboard
   Future<List<UserModel>> getLeaderboard({int limit = 10}) async {
     try {
-      // First run migration to ensure data consistency
-      await migrateUserDataFields();
-
       final querySnapshot =
           await FirebaseConfig.users
               .orderBy('totalScore', descending: true)
@@ -929,8 +927,19 @@ class DatabaseService {
   // ============================================================================
 
   // Migrate user data to fix field name inconsistencies
+  // This should only run ONCE per app installation
   Future<void> migrateUserDataFields() async {
     try {
+      // Check if migration already ran using SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final migrationKey = 'user_data_migration_v1_completed';
+      final alreadyMigrated = prefs.getBool(migrationKey) ?? false;
+
+      if (alreadyMigrated) {
+        print('✅ User data migration already completed, skipping...');
+        return;
+      }
+
       print('Starting user data migration...');
 
       // Get all users
@@ -983,9 +992,13 @@ class DatabaseService {
       } else {
         print('✅ No user records needed migration');
       }
+
+      // Mark migration as completed
+      await prefs.setBool(migrationKey, true);
+      print('✅ User data migration marked as completed');
     } catch (e) {
       print('❌ Error during user data migration: $e');
-      throw Exception('Failed to migrate user data: $e');
+      // Don't throw - let the app continue even if migration fails
     }
   }
 
@@ -1116,12 +1129,14 @@ class DatabaseService {
   }
 
   // Get upcoming scheduled games
-  Stream<List<ScheduledGameModel>> getUpcomingScheduledGamesStream() {
+  Stream<List<ScheduledGameModel>> getUpcomingScheduledGamesStream({
+    int limit = 5,
+  }) {
     return _firestore
         .collection('scheduled_games')
         .where('status', isEqualTo: GameStatus.scheduled.index)
         .orderBy('scheduledTime')
-        .limit(20)
+        .limit(limit) // Limit for better performance
         .snapshots()
         .map(
           (snapshot) =>
@@ -1438,12 +1453,16 @@ class DatabaseService {
   }
 
   // Get all games joined by a specific user
-  Stream<List<JoinedUserModel>> getUserJoinedGamesStream(String userId) {
+  Stream<List<JoinedUserModel>> getUserJoinedGamesStream(
+    String userId, {
+    int limit = 10,
+  }) {
     return _firestore
         .collection('joined_users')
         .where('userId', isEqualTo: userId)
         .where('isActive', isEqualTo: true)
         .orderBy('joinedAt', descending: true)
+        .limit(limit) // Limit results for better performance
         .snapshots()
         .map(
           (snapshot) =>

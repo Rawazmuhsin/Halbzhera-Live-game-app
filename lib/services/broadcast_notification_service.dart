@@ -50,28 +50,33 @@ class BroadcastNotificationService {
 
     _broadcastSubscription?.cancel(); // Cancel any existing subscription
 
-    // Add a small delay to ensure Firebase is fully initialized
-    Future.delayed(Duration(seconds: 2), () {
-      // Start with a simple query that doesn't require an index
-      _broadcastSubscription = _firestore
-          .collection('broadcast_notifications')
-          .where('isActive', isEqualTo: true)
-          .limit(10)
-          .snapshots()
-          .listen(
-            _handleBroadcastNotifications,
-            onError: (error) {
-              debugPrint(
-                '❌ Error listening for broadcast notifications: $error',
-              );
-              // Retry after 5 seconds
-              Future.delayed(Duration(seconds: 5), () {
-                debugPrint('🔄 Retrying broadcast notification listener...');
-                startListeningForBroadcastNotifications();
-              });
-            },
-          );
-      debugPrint('✅ Broadcast notification listener started');
+    // Add a 5 second delay to ensure Firebase is fully initialized
+    // and not block the app startup
+    Future.delayed(const Duration(seconds: 5), () {
+      try {
+        // Start with a simple query that doesn't require an index
+        _broadcastSubscription = _firestore
+            .collection('broadcast_notifications')
+            .where('isActive', isEqualTo: true)
+            .limit(10)
+            .snapshots()
+            .listen(
+              _handleBroadcastNotifications,
+              onError: (error) {
+                debugPrint(
+                  '❌ Error listening for broadcast notifications: $error',
+                );
+                // Retry after 10 seconds instead of 5
+                Future.delayed(const Duration(seconds: 10), () {
+                  debugPrint('🔄 Retrying broadcast notification listener...');
+                  startListeningForBroadcastNotifications();
+                });
+              },
+            );
+        debugPrint('✅ Broadcast notification listener started');
+      } catch (e) {
+        debugPrint('❌ Failed to start broadcast listener: $e');
+      }
     });
   }
 

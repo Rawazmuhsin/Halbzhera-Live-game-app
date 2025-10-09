@@ -36,7 +36,7 @@ class QuestionModel {
     this.explanation,
     required this.category,
     required this.difficulty,
-    this.points = 100,
+    this.points = 10,
     this.timeLimit = 15,
     this.order = 0,
     this.imageUrl,

@@ -286,8 +286,16 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               // Back to games button
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to home screen instead of just popping
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  // Navigate to home screen by removing all routes until first (root)
+                  // This will take user back to AuthGate which handles home screen logic
+                  try {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  } catch (e) {
+                    // If popUntil fails, try pushing to root
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil('/', (route) => false);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2DCCDB),

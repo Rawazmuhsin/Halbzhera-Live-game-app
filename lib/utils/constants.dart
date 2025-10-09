@@ -30,7 +30,7 @@ class AppConstants {
   static const int minQuestionsPerQuiz = 5;
 
   // Scoring
-  static const int correctAnswerPoints = 100;
+  static const int correctAnswerPoints = 10;
   static const int speedBonusMultiplier = 10;
   static const int wrongAnswerPenalty = 0;
   static const int maxSpeedBonus = 50;

@@ -36,10 +36,7 @@ final currentUserModelProvider = FutureProvider<UserModel?>((ref) async {
 
   final databaseService = ref.read(databaseServiceProvider);
 
-  // First ensure user data is migrated if needed
-  await databaseService.migrateUserDataFields();
-
-  // Then get the user data
+  // Just get the user data - migration is handled separately
   return await databaseService.getUser(user.uid);
 });
 

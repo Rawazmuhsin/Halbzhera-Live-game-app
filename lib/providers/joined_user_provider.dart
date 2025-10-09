@@ -21,7 +21,8 @@ final userJoinedGamesProvider = StreamProvider<List<JoinedUserModel>>((ref) {
   }
 
   final databaseService = ref.read(databaseServiceProvider);
-  return databaseService.getUserJoinedGamesStream(currentUser.uid);
+  // Limit to 5 most recent games for better performance
+  return databaseService.getUserJoinedGamesStream(currentUser.uid, limit: 5);
 });
 
 // Provider to check if current user has joined a specific game

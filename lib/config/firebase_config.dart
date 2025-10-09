@@ -38,10 +38,10 @@ class FirebaseConfig {
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      // Configure Firestore settings
+      // Configure Firestore settings with optimized cache
       firestore.settings = const Settings(
         persistenceEnabled: true,
-        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+        cacheSizeBytes: 50 * 1024 * 1024, // 50MB cache instead of unlimited
       );
 
       print('✅ Firebase initialized successfully!');

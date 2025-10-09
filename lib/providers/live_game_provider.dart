@@ -146,7 +146,7 @@ class LiveGameState {
   }
 
   // Check if game is active and user can still play
-  bool get isGameActive => currentGame?.isActive ?? false && !isEliminated;
+  bool get isGameActive => (currentGame?.isActive ?? false) && !isEliminated;
 
   // Check if game is live
   bool get isGameLive => currentGame?.status == LiveGameStatus.live;
@@ -182,17 +182,25 @@ class LiveGameNotifier extends StateNotifier<LiveGameState> {
   final DatabaseService _databaseService;
   final Ref _ref;
   Timer? _questionTimer;
-  StreamSubscription? _gameSubscription;
   StreamSubscription? _leaderboardSubscription;
   StreamSubscription? _userAnswerSubscription;
+  bool _listenersInitialized = false;
 
   LiveGameNotifier(this._databaseService, this._ref)
     : super(const LiveGameState()) {
-    // Initialize listeners when notifier is created
-    _initializeListeners();
+    // Don't initialize listeners automatically - wait until user joins a game
+    // This prevents unnecessary Firestore queries on app startup
   }
 
-  void _initializeListeners() {
+  // Call this when user joins a game
+  void initializeListeners() {
+    if (_listenersInitialized) return; // Already initialized
+
+    _listenersInitialized = true;
+    _setupListeners();
+  }
+
+  void _setupListeners() {
     // Listen to current live game using the provider
     _ref.listen(currentLiveGameProvider, (previous, next) {
       next.when(
@@ -383,6 +391,9 @@ class LiveGameNotifier extends StateNotifier<LiveGameState> {
 
       final userModel = UserModel.fromFirebaseUser(currentUser);
       await _databaseService.joinLiveGame(gameId, userModel);
+
+      // Initialize listeners now that user has joined
+      initializeListeners();
 
       state = state.copyWith(isJoined: true, isLoading: false);
     } catch (e) {
