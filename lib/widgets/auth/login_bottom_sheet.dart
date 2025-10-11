@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/constants.dart';
 import '../../providers/auth_provider.dart';
-import '../../models/user_model.dart';
 import 'social_login_button.dart';
 
 class LoginBottomSheet extends ConsumerStatefulWidget {
@@ -59,6 +58,9 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet>
   bool _isFacebookLoading = false;
   bool _isGuestLoading = false;
 
+  // Flag to prevent multiple close attempts
+  bool _isClosing = false;
+
   @override
   void initState() {
     super.initState();
@@ -85,52 +87,33 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet>
   }
 
   void _closeSheet() {
+    if (!mounted || _isClosing) return;
+
+    _isClosing = true;
+
+    // Safely close the sheet
     _animationController.reverse().then((_) {
-      if (mounted) {
+      if (mounted && Navigator.canPop(context)) {
         Navigator.of(context).pop();
+      }
+    });
+  }
+
+  void _safeCloseSheet() {
+    if (!mounted || _isClosing) return;
+
+    // Use post-frame callback to ensure we're not in the middle of a build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_isClosing && Navigator.canPop(context)) {
+        _closeSheet();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Listen to auth state changes
-    ref.listen<AsyncValue<UserModel?>>(authNotifierProvider, (previous, next) {
-      next.when(
-        data: (user) {
-          if (user != null) {
-            // Authentication successful, close the sheet
-            _closeSheet();
-          }
-          // Reset loading states on success
-          if (mounted) {
-            setState(() {
-              _isGoogleLoading = false;
-              _isFacebookLoading = false;
-              _isGuestLoading = false;
-            });
-          }
-        },
-        loading: () {
-          // Keep loading states as they are
-        },
-        error: (error, stackTrace) {
-          // Reset loading states on error
-          if (mounted) {
-            setState(() {
-              _isGoogleLoading = false;
-              _isFacebookLoading = false;
-              _isGuestLoading = false;
-            });
-          }
-          // Show error message
-          _showErrorSnackBar(error.toString());
-        },
-      );
-    });
-
     return GestureDetector(
-      onTap: _closeSheet,
+      onTap: _safeCloseSheet,
       child: AnimatedBuilder(
         animation: _animationController,
         builder: (context, child) {
@@ -354,33 +337,43 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet>
   }
 
   Future<void> _handleGoogleLogin() async {
-    if (_isGoogleLoading) return;
+    if (_isGoogleLoading || !mounted) return;
 
-    setState(() {
-      _isGoogleLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isGoogleLoading = true;
+      });
+    }
 
     try {
       // Call the auth service directly
       await ref.read(authNotifierProvider.notifier).signInWithGoogle();
 
-      // Success is handled by the listener
+      // Success - close the sheet
+      if (mounted) {
+        _closeSheet();
+      }
     } catch (e) {
-      // Error is handled by the listener, but ensure loading state is reset
+      // Error - reset loading state and show error
       if (mounted) {
         setState(() {
           _isGoogleLoading = false;
         });
+        _showErrorSnackBar('خەڵەیەک ڕوویدا لە چوونە ژوورەوە: ${e.toString()}');
       }
     }
   }
 
   Future<void> _handleFacebookLogin() async {
-    if (_isFacebookLoading || widget.onFacebookLogin == null) return;
+    if (_isFacebookLoading || widget.onFacebookLogin == null || !mounted) {
+      return;
+    }
 
-    setState(() {
-      _isFacebookLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isFacebookLoading = true;
+      });
+    }
 
     try {
       widget.onFacebookLogin!();
@@ -397,29 +390,40 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet>
   }
 
   Future<void> _handleGuestLogin() async {
-    if (_isGuestLoading) return;
+    if (_isGuestLoading || !mounted) return;
 
-    setState(() {
-      _isGuestLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isGuestLoading = true;
+      });
+    }
 
     try {
       // Call the auth service directly
       await ref.read(authNotifierProvider.notifier).signInAnonymously();
 
-      // Success is handled by the listener
+      // Success - close the sheet
+      if (mounted) {
+        _closeSheet();
+      }
     } catch (e) {
-      // Error is handled by the listener, but ensure loading state is reset
+      // Error - reset loading state and show error
       if (mounted) {
         setState(() {
           _isGuestLoading = false;
         });
+        _showErrorSnackBar('خەڵەیەک ڕوویدا لە چوونە ژوورەوە: ${e.toString()}');
       }
     }
   }
 
   void _showErrorSnackBar(String message) {
-    if (mounted) {
+    if (!mounted) return; // Guard against unmounted widget
+
+    // Use a post-frame callback to ensure the context is still valid
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -438,11 +442,13 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet>
             label: 'پاشگەزبوونەوە',
             textColor: AppColors.white,
             onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              if (mounted) {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              }
             },
           ),
         ),
       );
-    }
+    });
   }
 }
