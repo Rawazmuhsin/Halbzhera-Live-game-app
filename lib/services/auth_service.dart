@@ -173,16 +173,23 @@ class AuthService {
       final UserCredential userCredential = await _auth.signInAnonymously();
 
       if (userCredential.user != null) {
-        // Create user model
+        // Generate unique guest ID
+        final guestId = await _databaseService.generateGuestId();
+
+        // Create user model with guest ID
         final userModel = UserModel.fromFirebaseUser(
           userCredential.user!,
           provider: LoginProvider.anonymous,
+          guestId: guestId,
         );
 
-        // Save user to database
-        await _databaseService.createOrUpdateUser(userModel);
+        // Update display name to show guest ID
+        final updatedUserModel = userModel.copyWith(displayName: guestId);
 
-        return userModel;
+        // Save user to database
+        await _databaseService.createOrUpdateUser(updatedUserModel);
+
+        return updatedUserModel;
       }
 
       return null;

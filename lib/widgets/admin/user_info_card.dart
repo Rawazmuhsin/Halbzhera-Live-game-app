@@ -97,6 +97,26 @@ class UserInfoCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+        // Show guest ID for anonymous users
+        if (user.provider == LoginProvider.anonymous &&
+            user.guestId != null) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.person_outline, color: AppColors.info, size: 14),
+              const SizedBox(width: 4),
+              Text(
+                user.guestId!,
+                style: TextStyle(
+                  color: AppColors.info,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 8),
         Wrap(
           spacing: AppDimensions.paddingS,

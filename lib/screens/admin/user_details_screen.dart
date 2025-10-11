@@ -110,6 +110,43 @@ class UserDetailsScreen extends ConsumerWidget {
                     maxLines: 1,
                   ),
                 ],
+                // Show guest ID for anonymous users
+                if (user.provider == LoginProvider.anonymous &&
+                    user.guestId != null) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.info.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColors.info.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.person_outline,
+                          color: AppColors.info,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          user.guestId!,
+                          style: TextStyle(
+                            color: AppColors.info,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -339,6 +376,8 @@ class UserDetailsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppDimensions.paddingM),
           _buildDetailRow('ناسنامەی بەکارهێنەر', user.uid),
+          if (user.guestId != null)
+            _buildDetailRow('ناسنامەی میوان', user.guestId!),
           _buildDetailRow('دواجار بینراوە', _formatDateTime(user.lastSeen)),
           _buildDetailRow('بەروار دروستکردن', _formatDateTime(user.createdAt)),
           _buildDetailRow('جۆری چوونەژوورەوە', _getProviderName(user.provider)),

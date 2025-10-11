@@ -43,11 +43,58 @@ class WelcomeSection extends ConsumerWidget {
             data: (user) {
               String displayName = 'کاربەر';
               if (user != null) {
-                if (user.displayName?.isNotEmpty == true) {
-                  displayName = user.displayName!;
-                } else if (user.email?.isNotEmpty == true) {
-                  // Extract name from email (before @)
-                  displayName = user.email!.split('@').first;
+                // Check if user is anonymous/guest and has a guestId
+                if (user.isAnonymous) {
+                  // Try to get user data from database to retrieve guestId
+                  final userModelAsync = ref.watch(currentUserModelProvider);
+                  return userModelAsync.when(
+                    data: (userData) {
+                      if (userData?.guestId != null) {
+                        displayName = userData!.guestId!;
+                      } else if (user.displayName?.isNotEmpty == true) {
+                        displayName = user.displayName!;
+                      } else {
+                        displayName = 'میوان';
+                      }
+                      return Text(
+                        'بەخێرهاتنەوە، $displayName!',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.lightText,
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
+                    loading:
+                        () => const Text(
+                          'بەخێرهاتنەوە، میوان!',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.lightText,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                    error:
+                        (_, __) => const Text(
+                          'بەخێرهاتنەوە، میوان!',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.lightText,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                  );
+                } else {
+                  // Regular user (Google, Facebook, etc.)
+                  if (user.displayName?.isNotEmpty == true) {
+                    displayName = user.displayName!;
+                  } else if (user.email?.isNotEmpty == true) {
+                    // Extract name from email (before @)
+                    displayName = user.email!.split('@').first;
+                  }
                 }
               }
               return Text(

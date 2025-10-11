@@ -498,11 +498,13 @@ class _AboutScreenState extends State<AboutScreen>
         children: [
           const Icon(Icons.star, color: AppColors.accentYellow, size: 18),
           const SizedBox(width: AppDimensions.paddingS),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.lightText,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.lightText,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(width: AppDimensions.paddingS),

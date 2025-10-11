@@ -99,7 +99,7 @@ class _UsersTabState extends ConsumerState<UsersTab> {
           child: TextField(
             onChanged: (value) => setState(() => _searchQuery = value),
             decoration: InputDecoration(
-              hintText: 'گەڕان بۆ بەکارهێنەر...',
+              hintText: 'گەڕان بە ناو، ئیمەیڵ، یان ناسنامەی میوان...',
               prefixIcon: const Icon(Icons.search, color: AppColors.mediumText),
               filled: true,
               fillColor: AppColors.surface2,
@@ -274,7 +274,10 @@ class _UsersTabState extends ConsumerState<UsersTab> {
               ) ==
               true ||
           user.email?.toLowerCase().contains(_searchQuery.toLowerCase()) ==
-              true;
+              true ||
+          user.guestId?.toLowerCase().contains(_searchQuery.toLowerCase()) ==
+              true ||
+          user.uid.toLowerCase().contains(_searchQuery.toLowerCase());
 
       final matchesFilter =
           _selectedFilter == 'all' ||
@@ -298,7 +301,7 @@ class _UsersTabState extends ConsumerState<UsersTab> {
             content: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: const InputDecoration(
-                hintText: 'ناو یان ئیمەیڵ بنووسە...',
+                hintText: 'ناو، ئیمەیڵ، یان ناسنامەی میوان بنووسە...',
                 hintStyle: TextStyle(color: AppColors.mediumText),
               ),
               style: const TextStyle(color: AppColors.lightText),

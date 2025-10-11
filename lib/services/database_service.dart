@@ -16,6 +16,42 @@ import '../models/joined_user_model.dart';
 class DatabaseService {
   final FirebaseFirestore _firestore = FirebaseConfig.firestore;
 
+  // Generate a unique guest ID
+  Future<String> generateGuestId() async {
+    try {
+      // Get current count of guest users
+      final guestUsersSnapshot =
+          await FirebaseConfig.users
+              .where('provider', isEqualTo: LoginProvider.anonymous.index)
+              .count()
+              .get();
+
+      final guestCount = (guestUsersSnapshot.count ?? 0) + 1;
+
+      // Generate ID with format: GUEST-1234
+      final guestId = 'GUEST-${guestCount.toString().padLeft(4, '0')}';
+
+      // Check if this ID already exists (rare case of concurrent creation)
+      final existingDoc =
+          await FirebaseConfig.users
+              .where('guestId', isEqualTo: guestId)
+              .limit(1)
+              .get();
+
+      if (existingDoc.docs.isNotEmpty) {
+        // If exists, use timestamp to ensure uniqueness
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        return 'GUEST-${timestamp.toString().substring(timestamp.toString().length - 6)}';
+      }
+
+      return guestId;
+    } catch (e) {
+      // Fallback to timestamp-based ID
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      return 'GUEST-${timestamp.toString().substring(timestamp.toString().length - 6)}';
+    }
+  }
+
   // ============================================================================
   // USER OPERATIONS (Same as before)
   // ============================================================================
