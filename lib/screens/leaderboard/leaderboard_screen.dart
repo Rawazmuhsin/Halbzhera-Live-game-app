@@ -21,6 +21,8 @@ class LeaderboardScreen extends ConsumerStatefulWidget {
 
 class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   late Future<List<Map<String, dynamic>>> _leaderboardFuture;
+  int _displayLimit = 10; // Start with 10 users
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -32,15 +34,32 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     final databaseService = ref.read(databaseServiceProvider);
 
     if (widget.gameId != null) {
-      // Load game-specific leaderboard
+      // Load game-specific leaderboard with current limit
       _leaderboardFuture = databaseService.getGameTopWinners(
         gameId: widget.gameId!,
-        limit: 50,
+        limit: _displayLimit,
       );
     } else {
-      // Load global leaderboard
-      _leaderboardFuture = databaseService.getTopWinners(limit: 50);
+      // Load global leaderboard with current limit
+      _leaderboardFuture = databaseService.getTopWinners(limit: _displayLimit);
     }
+  }
+
+  void _loadMore() {
+    setState(() {
+      _isLoadingMore = true;
+      _displayLimit += 10; // Load 10 more users
+      _loadLeaderboard();
+    });
+
+    // Reset loading state after data is loaded
+    _leaderboardFuture.then((_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    });
   }
 
   @override
@@ -88,6 +107,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     return RefreshIndicator(
       onRefresh: () async {
         setState(() {
+          _displayLimit = 10; // Reset to initial limit on refresh
           _loadLeaderboard();
         });
       },
@@ -255,7 +275,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                       horizontal: 15,
                     ),
                     decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
+                      color: AppColors.darkBlue3,
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
@@ -292,6 +312,59 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                   final player = winners[index];
                   return _buildPlayerListItem(player, index);
                 }, childCount: winners.length),
+              ),
+
+              // Load More Button
+              SliverToBoxAdapter(
+                child:
+                    winners.length >= _displayLimit
+                        ? Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 20,
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: _isLoadingMore ? null : _loadMore,
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: AppColors.lightText,
+                              backgroundColor: AppColors.primaryTeal,
+                              disabledBackgroundColor: AppColors.primaryTeal
+                                  .withOpacity(0.5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 14,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              elevation: 4,
+                            ),
+                            icon:
+                                _isLoadingMore
+                                    ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              AppColors.white,
+                                            ),
+                                      ),
+                                    )
+                                    : const Icon(Icons.arrow_downward),
+                            label: Text(
+                              _isLoadingMore
+                                  ? 'بارکردنەوە...'
+                                  : 'زیاتر بارکە (${winners.length} یاریزان)',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        )
+                        : const SizedBox.shrink(),
               ),
 
               // Bottom spacing
@@ -562,11 +635,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [color, color.withOpacity(0.7)],
-            ),
+            color: color,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
             boxShadow: [
               BoxShadow(
@@ -617,14 +686,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.surface2.withOpacity(0.8),
-            AppColors.surface1.withOpacity(0.9),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.surface2,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -760,7 +822,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
+                color: AppColors.darkBlue3,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
