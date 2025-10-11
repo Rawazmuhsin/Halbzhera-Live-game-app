@@ -885,37 +885,42 @@ class DatabaseService {
     );
   }
 
-  // Get live game statistics
+  // Get live game statistics - OPTIMIZED with count queries
   Future<Map<String, dynamic>> getLiveGameStats() async {
     try {
       final now = DateTime.now();
       final todayStart = DateTime(now.year, now.month, now.day);
       final todayEnd = todayStart.add(const Duration(days: 1));
 
-      // Get today's games
-      final todayGames =
+      // Use count queries instead of fetching all documents (much faster!)
+      final todayGamesCount =
           await FirebaseConfig.liveGames
               .where(
                 'scheduledTime',
                 isGreaterThanOrEqualTo: Timestamp.fromDate(todayStart),
               )
               .where('scheduledTime', isLessThan: Timestamp.fromDate(todayEnd))
+              .count()
               .get();
 
-      // Get total games
-      final totalGames = await FirebaseConfig.liveGames.get();
+      // Get total games count (use aggregation)
+      final totalGamesCount = await FirebaseConfig.liveGames.count().get();
 
-      // Get active participants
-      final activeAnswers =
+      // Get active participants count
+      final activeAnswersCount =
           await FirebaseConfig.liveAnswers
               .where('isActive', isEqualTo: true)
+              .count()
               .get();
 
+      // Get total users count
+      final totalUsersCount = await FirebaseConfig.users.count().get();
+
       return {
-        'todayGames': todayGames.docs.length,
-        'totalGames': totalGames.docs.length,
-        'activeParticipants': activeAnswers.docs.length,
-        'totalUsers': (await FirebaseConfig.users.get()).docs.length,
+        'todayGames': todayGamesCount.count ?? 0,
+        'totalGames': totalGamesCount.count ?? 0,
+        'activeParticipants': activeAnswersCount.count ?? 0,
+        'totalUsers': totalUsersCount.count ?? 0,
       };
     } catch (e) {
       throw Exception('Failed to get live game stats: $e');
@@ -1132,9 +1137,15 @@ class DatabaseService {
   Stream<List<ScheduledGameModel>> getUpcomingScheduledGamesStream({
     int limit = 5,
   }) {
+    final now = DateTime.now();
+
     return _firestore
         .collection('scheduled_games')
         .where('status', isEqualTo: GameStatus.scheduled.index)
+        .where(
+          'scheduledTime',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(now),
+        ) // ✅ Filter future games in database
         .orderBy('scheduledTime')
         .limit(limit) // Limit for better performance
         .snapshots()
@@ -1142,8 +1153,7 @@ class DatabaseService {
           (snapshot) =>
               snapshot.docs
                   .map((doc) => ScheduledGameModel.fromFirestore(doc))
-                  .where((game) => game.scheduledTime.isAfter(DateTime.now()))
-                  .toList(),
+                  .toList(), // ✅ No need for Dart filtering anymore
         );
   }
 
@@ -1267,29 +1277,35 @@ class DatabaseService {
         );
   }
 
-  // Get questions by category stream
-  Stream<List<QuestionModel>> getQuestionsByCategoryStream(String categoryId) {
-    return FirebaseConfig.questions
+  // Get questions by category stream - with optional limit for performance
+  Stream<List<QuestionModel>> getQuestionsByCategoryStream(
+    String categoryId, {
+    int? limit,
+  }) {
+    Query query = FirebaseConfig.questions
         .where('category', isEqualTo: categoryId)
-        .where('isActive', isEqualTo: true)
-        // .orderBy('order') // Temporarily commented out until index is built
-        .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs
-                  .map((doc) => QuestionModel.fromFirestore(doc))
-                  .toList()
-                ..sort(
-                  (a, b) => a.order.compareTo(b.order),
-                ), // Sort in memory instead
-        );
+        .where('isActive', isEqualTo: true);
+    // .orderBy('order') // Temporarily commented out until index is built
+
+    if (limit != null) {
+      query = query.limit(limit);
+    }
+
+    return query.snapshots().map(
+      (snapshot) =>
+          snapshot.docs.map((doc) => QuestionModel.fromFirestore(doc)).toList()
+            ..sort(
+              (a, b) => a.order.compareTo(b.order),
+            ), // Sort in memory instead
+    );
   }
 
-  // Get all questions stream (for admin)
-  Stream<List<QuestionModel>> getAllQuestionsStream() {
+  // Get all questions stream (for admin) - with limit for performance
+  Stream<List<QuestionModel>> getAllQuestionsStream({int limit = 50}) {
     return FirebaseConfig.questions
         .where('isActive', isEqualTo: true)
         .orderBy('createdAt', descending: true)
+        .limit(limit) // Limit for performance
         .snapshots()
         .map(
           (snapshot) =>
