@@ -20,6 +20,7 @@ class UserModel {
   final DateTime lastSeen;
   final bool isOnline;
   final Map<String, dynamic> preferences;
+  final String? guestId; // Unique ID for guest users (e.g., "GUEST-1234")
 
   const UserModel({
     required this.uid,
@@ -35,10 +36,15 @@ class UserModel {
     required this.lastSeen,
     this.isOnline = false,
     this.preferences = const {},
+    this.guestId,
   });
 
   // Create from Firebase User
-  factory UserModel.fromFirebaseUser(User user, {LoginProvider? provider}) {
+  factory UserModel.fromFirebaseUser(
+    User user, {
+    LoginProvider? provider,
+    String? guestId,
+  }) {
     LoginProvider userProvider = provider ?? LoginProvider.anonymous;
 
     // Determine provider from user data
@@ -61,6 +67,7 @@ class UserModel {
       // Don't set firstLoginAt here - it will be set by the database service
       lastSeen: DateTime.now(),
       isOnline: true,
+      guestId: guestId, // Pass guest ID if provided
     );
   }
 
@@ -82,6 +89,7 @@ class UserModel {
       lastSeen: (data['lastSeen'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isOnline: data['isOnline'] ?? false,
       preferences: Map<String, dynamic>.from(data['preferences'] ?? {}),
+      guestId: data['guestId'], // Load guest ID from Firestore
     );
   }
 
@@ -106,6 +114,11 @@ class UserModel {
       data['firstLoginAt'] = Timestamp.fromDate(firstLoginAt!);
     }
 
+    // Only include guestId if it's not null
+    if (guestId != null) {
+      data['guestId'] = guestId;
+    }
+
     return data;
   }
 
@@ -124,6 +137,7 @@ class UserModel {
     DateTime? lastSeen,
     bool? isOnline,
     Map<String, dynamic>? preferences,
+    String? guestId,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -139,6 +153,7 @@ class UserModel {
       lastSeen: lastSeen ?? this.lastSeen,
       isOnline: isOnline ?? this.isOnline,
       preferences: preferences ?? this.preferences,
+      guestId: guestId ?? this.guestId,
     );
   }
 
