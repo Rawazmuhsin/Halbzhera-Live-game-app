@@ -1,5 +1,5 @@
 // File: lib/screens/admin/section_questions_screen.dart
-// Description: Screen to view all questions in a game section
+// Description: Screen to view all questions in a game section with pagination
 
 // ignore_for_file: deprecated_member_use
 
@@ -10,18 +10,36 @@ import '../../models/scheduled_game_model.dart';
 import '../../providers/question_provider.dart';
 import 'create_question_screen.dart';
 
-class SectionQuestionsScreen extends ConsumerWidget {
+class SectionQuestionsScreen extends ConsumerStatefulWidget {
   final ScheduledGameModel gameSection;
 
   const SectionQuestionsScreen({super.key, required this.gameSection});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SectionQuestionsScreen> createState() =>
+      _SectionQuestionsScreenState();
+}
+
+class _SectionQuestionsScreenState
+    extends ConsumerState<SectionQuestionsScreen> {
+  int _displayLimit = 20; // Start with 20 questions
+
+  void _loadMore() {
+    setState(() {
+      _displayLimit += 20; // Load 20 more questions
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final questionsAsync = ref.watch(
-      questionsByCategoryProvider(gameSection.categoryName),
+      questionsByCategoryLimitedProvider((
+        categoryId: widget.gameSection.categoryName,
+        limit: _displayLimit,
+      )),
     );
     final questionCount = ref.watch(
-      totalQuestionCountProvider(gameSection.categoryName),
+      totalQuestionCountProvider(widget.gameSection.categoryName),
     );
 
     return Scaffold(
@@ -33,7 +51,7 @@ class SectionQuestionsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              gameSection.name,
+              widget.gameSection.name,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -128,16 +146,16 @@ class SectionQuestionsScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                gameSection.name,
+                                widget.gameSection.name,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              if (gameSection.description.isNotEmpty)
+                              if (widget.gameSection.description.isNotEmpty)
                                 Text(
-                                  gameSection.description,
+                                  widget.gameSection.description,
                                   style: TextStyle(
                                     color: Colors.grey[400],
                                     fontSize: 14,
@@ -160,14 +178,14 @@ class SectionQuestionsScreen extends ConsumerWidget {
                         const SizedBox(width: 12),
                         _buildInfoChip(
                           'خاڵ',
-                          gameSection.prize,
+                          widget.gameSection.prize,
                           Icons.stars,
                           Colors.amber,
                         ),
                         const SizedBox(width: 12),
                         _buildInfoChip(
                           'کات',
-                          '${gameSection.duration} خولەک',
+                          '${widget.gameSection.duration} خولەک',
                           Icons.timer,
                           Colors.blue,
                         ),
@@ -179,23 +197,63 @@ class SectionQuestionsScreen extends ConsumerWidget {
 
               // Questions List
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: questions.length,
-                  itemBuilder: (context, index) {
-                    final question = questions[index];
-                    return QuestionItemCard(
-                      key: ValueKey(question.id),
-                      question: question,
-                      index: index + 1,
-                      onQuestionUpdated: () {
-                        // Refresh the questions list
-                        ref.invalidate(
-                          questionsByCategoryProvider(gameSection.categoryName),
-                        );
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: questions.length,
+                        itemBuilder: (context, index) {
+                          final question = questions[index];
+                          return QuestionItemCard(
+                            key: ValueKey(question.id),
+                            question: question,
+                            index: index + 1,
+                            onQuestionUpdated: () {
+                              // Refresh the questions list
+                              ref.invalidate(
+                                questionsByCategoryLimitedProvider((
+                                  categoryId: widget.gameSection.categoryName,
+                                  limit: _displayLimit,
+                                )),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    // Load More button if there are more questions
+                    questionCount.when(
+                      data: (totalCount) {
+                        if (questions.length < totalCount) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: _loadMore,
+                                  icon: const Icon(Icons.arrow_downward),
+                                  label: Text(
+                                    'بارکردنی زیاتر (${questions.length}/$totalCount)',
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return const SizedBox();
                       },
-                    );
-                  },
+                      loading: () => const SizedBox(),
+                      error: (_, __) => const SizedBox(),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -238,7 +296,8 @@ class SectionQuestionsScreen extends ConsumerWidget {
             context,
             MaterialPageRoute(
               builder:
-                  (context) => CreateQuestionScreen(gameSection: gameSection),
+                  (context) =>
+                      CreateQuestionScreen(gameSection: widget.gameSection),
             ),
           );
         },
@@ -280,7 +339,7 @@ class SectionQuestionsScreen extends ConsumerWidget {
                 MaterialPageRoute(
                   builder:
                       (context) =>
-                          CreateQuestionScreen(gameSection: gameSection),
+                          CreateQuestionScreen(gameSection: widget.gameSection),
                 ),
               );
             },

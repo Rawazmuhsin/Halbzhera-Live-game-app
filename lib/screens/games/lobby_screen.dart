@@ -304,6 +304,7 @@ class _LobbyScreenState extends ConsumerState<LobbyScreen>
           await FirebaseConfig.firestore
               .collection('questions')
               .where('gameId', isEqualTo: gameId)
+              .limit(50) // ✅ Safety limit - games shouldn't have >50 questions
               .get();
 
       if (questionsSnapshot.docs.isEmpty) {

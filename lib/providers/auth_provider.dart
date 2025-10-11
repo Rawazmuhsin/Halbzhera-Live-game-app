@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
+import '../services/analytics_cache_service.dart';
 
 // ============================================================================
 // AUTH STATE PROVIDERS
@@ -241,10 +242,10 @@ class AdminAuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     }
   }
 
-  // Get all users for admin dashboard
-  Future<List<UserModel>> getAllUsers() async {
+  // Get all users for admin dashboard (with optional limit)
+  Future<List<UserModel>> getAllUsers({int limit = 20}) async {
     try {
-      return await _databaseService.getAllUsers(limit: 100);
+      return await _databaseService.getAllUsers(limit: limit);
     } catch (e) {
       throw Exception('Failed to get users: $e');
     }
@@ -354,16 +355,31 @@ final userLiveGameHistoryProvider =
 // ADMIN PROVIDERS
 // ============================================================================
 
-// All users provider for admin
+// All users provider for admin (limited to prevent performance issues)
 final allUsersProvider = FutureProvider<List<UserModel>>((ref) async {
   final adminNotifier = ref.read(adminAuthNotifierProvider.notifier);
-  return adminNotifier.getAllUsers();
+  return adminNotifier.getAllUsers(
+    limit: 20,
+  ); // Limit to 20 users for better performance
 });
 
-// Live game stats provider for admin
+// Paginated users provider for admin (for infinite scroll/load more)
+final paginatedUsersProvider = StreamProvider.family<List<UserModel>, int>((
+  ref,
+  limit,
+) {
+  final databaseService = ref.read(databaseServiceProvider);
+  return databaseService.getUsersPaginated(limit: limit);
+});
+
+// Live game stats provider for admin (with caching)
 final liveGameStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final adminNotifier = ref.read(adminAuthNotifierProvider.notifier);
-  return adminNotifier.getLiveGameStats();
+  final databaseService = ref.read(databaseServiceProvider);
+  // Use cached stats with 2-minute cache duration
+  return AnalyticsCacheService.getLiveGameStats(
+    databaseService: databaseService,
+    forceRefresh: false,
+  );
 });
 
 // Is admin provider

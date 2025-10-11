@@ -86,7 +86,7 @@ class _AboutScreenState extends State<AboutScreen>
         labelColor: AppColors.white,
         unselectedLabelColor: AppColors.mediumText,
         indicator: BoxDecoration(
-          gradient: AppColors.primaryGradient,
+          color: AppColors.darkBlue3,
           borderRadius: BorderRadius.circular(AppDimensions.radiusL),
         ),
         tabs: const [
@@ -323,13 +323,11 @@ class _AboutScreenState extends State<AboutScreen>
             ),
             child: Stack(
               children: [
-                // Background gradient overlay
+                // Background solid color
                 Container(
                   height: 120,
                   width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                  ),
+                  decoration: const BoxDecoration(color: AppColors.darkBlue3),
                 ),
 
                 // Profile info with image
@@ -470,7 +468,7 @@ class _AboutScreenState extends State<AboutScreen>
           Container(
             padding: const EdgeInsets.all(AppDimensions.paddingM),
             decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
+              color: AppColors.darkBlue3,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(AppDimensions.radiusL),
                 topRight: Radius.circular(AppDimensions.radiusL),
@@ -529,7 +527,7 @@ class _AboutScreenState extends State<AboutScreen>
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
+              color: AppColors.darkBlue3,
               shape: BoxShape.circle,
             ),
             child: Center(

@@ -57,23 +57,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 700;
+
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
           child: Column(
             children: [
               Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildAppLogo(),
-                    const SizedBox(height: AppDimensions.paddingXL),
-                    _buildAppTitle(),
-                    const SizedBox(height: AppDimensions.paddingM),
-                    _buildSubtitle(),
-                    const SizedBox(height: AppDimensions.paddingXXL),
-                    _buildFeatureIcons(),
-                  ],
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight:
+                          MediaQuery.of(context).size.height -
+                          MediaQuery.of(context).padding.top -
+                          MediaQuery.of(context).padding.bottom -
+                          100, // Space for button
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildAppLogo(),
+                        SizedBox(
+                          height:
+                              isSmallScreen
+                                  ? AppDimensions.paddingL
+                                  : AppDimensions.paddingXL,
+                        ),
+                        _buildAppTitle(),
+                        SizedBox(
+                          height:
+                              isSmallScreen
+                                  ? AppDimensions.paddingS
+                                  : AppDimensions.paddingM,
+                        ),
+                        _buildSubtitle(),
+                        SizedBox(
+                          height:
+                              isSmallScreen
+                                  ? AppDimensions.paddingL
+                                  : AppDimensions.paddingXXL,
+                        ),
+                        _buildFeatureIcons(),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               _buildGetStartedButton(),
@@ -85,6 +114,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Widget _buildAppLogo() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 700;
+    final double logoWidthFactor = isSmallScreen ? 0.4 : 0.5;
+
     return AnimatedBuilder(
       animation: _logoAnimation,
       builder: (context, child) {
@@ -95,8 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             child: Transform.rotate(
               angle: _logoAnimation.value * 0.05,
               child: FractionallySizedBox(
-                widthFactor:
-                    0.5, // Adjust this value to control the logo size relative to the screen width
+                widthFactor: logoWidthFactor,
                 child: AspectRatio(
                   aspectRatio: 1,
                   child: Container(
@@ -129,7 +161,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         borderRadius: BorderRadius.circular(22),
                         child: Image.asset(
                           AppConstants.logoPath,
-                          fit: BoxFit.cover, // Changed from BoxFit.contain
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -144,6 +176,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Widget _buildAppTitle() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bool isSmallScreen = screenHeight < 700;
+    final double titleFontSize = isSmallScreen ? 48 : 58;
+
     return AnimatedBuilder(
       animation: _titleAnimation,
       builder: (context, child) {
@@ -154,7 +190,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           child: Text(
             AppTexts.appTitle,
             style: TextStyle(
-              fontSize: 58,
+              fontSize: titleFontSize,
               fontWeight: FontWeight.w900,
               color: AppColors.white,
               letterSpacing: -1,

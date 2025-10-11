@@ -17,12 +17,19 @@ import '../../services/game_result_service.dart';
 import '../../providers/database_provider.dart';
 import '../../screens/games/results_screen.dart';
 
-// Provider that fetches all questions from Firestore
+// ⚠️ WARNING: This provider is currently UNUSED in the codebase
+// If you need to use it, please add proper filters (category, isActive, etc.)
+// and consider using pagination for large question sets
+// Provider that fetches questions from Firestore with a safety limit
 final allQuestionsProvider = FutureProvider<List<Map<String, dynamic>>>((
   ref,
 ) async {
   try {
-    final snapshot = await FirebaseConfig.questions.get();
+    // ✅ Safety limit added to prevent fetching thousands of questions
+    final snapshot =
+        await FirebaseConfig.questions
+            .limit(50) // Only fetch 50 questions max
+            .get();
     if (snapshot.docs.isEmpty) {
       return [];
     }

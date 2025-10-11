@@ -22,12 +22,27 @@ final categoriesProvider = StreamProvider<List<CategoryModel>>((ref) {
   return databaseService.getCategoriesStream();
 });
 
-// Questions by category provider
+// Questions by category provider - with optional limit for pagination
 final questionsByCategoryProvider =
     StreamProvider.family<List<QuestionModel>, String>((ref, categoryId) {
       final databaseService = ref.read(databaseServiceProvider);
-      return databaseService.getQuestionsByCategoryStream(categoryId);
+      return databaseService.getQuestionsByCategoryStream(
+        categoryId,
+        limit: 20,
+      ); // Limited to 20
     });
+
+// Questions by category provider with custom limit
+final questionsByCategoryLimitedProvider = StreamProvider.family<
+  List<QuestionModel>,
+  ({String categoryId, int limit})
+>((ref, params) {
+  final databaseService = ref.read(databaseServiceProvider);
+  return databaseService.getQuestionsByCategoryStream(
+    params.categoryId,
+    limit: params.limit,
+  );
+});
 
 // Question count by category provider
 final questionCountByCategoryProvider = Provider.family<int, String>((
@@ -84,10 +99,12 @@ final totalQuestionCountProvider = FutureProvider.family<int, String>((
   }
 });
 
-// All questions provider (for admin)
+// All questions provider (for admin) - limited for performance
 final allQuestionsProvider = StreamProvider<List<QuestionModel>>((ref) {
   final databaseService = ref.read(databaseServiceProvider);
-  return databaseService.getAllQuestionsStream();
+  return databaseService.getAllQuestionsStream(
+    limit: 50,
+  ); // Limit to 50 questions
 });
 
 // Question statistics provider
